@@ -109,7 +109,10 @@
 
   &__form-row {
     display: flex;
+    background-color: white;
     gap: 16px;
+    padding: 10px;
+    border-radius: 10px;
     align-items: flex-end;
 
     .form-group {
@@ -154,7 +157,7 @@
       }
 
       .edit-input {
-        background-color: #f7f8f9;
+        background-color: #fafafa;
         border: 1px solid transparent;
         border-radius: 10px;
         color: var(--color-text-primary);

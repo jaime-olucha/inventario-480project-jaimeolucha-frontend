@@ -1,23 +1,10 @@
+// Estilos base de .section-page en src/ui/styles/components/_section-page.scss
+// @keyframes fab-in en src/ui/styles/base/_animations.scss
+
 .section-page {
-  padding: 20px;
-
-  h1 {
-    font-size: 36px;
-    font-weight: bold;
-  }
-
-  h2 {
-    font-size: 18px;
-    font-weight: 500;
-  }
-
   h3 {
     font-size: 18px;
     font-weight: 500;
-  }
-
-  p {
-    font-size: 16px;
   }
 
   .iconSvg {
@@ -34,26 +21,11 @@
     width: 100%;
     justify-content: space-between;
     align-items: center;
-
     font-size: 22px;
-  }
-
-  .info {
-    color: var(--color-text-secondary);
   }
 
   .info-client {
     margin-top: 20px;
-  }
-
-  .section-page_header {
-    display: flex;
-    justify-content: space-between;
-  }
-
-  @keyframes fab-in {
-    from { transform: scale(0.6); opacity: 0; }
-    to   { transform: scale(1);   opacity: 1; }
   }
 
   .card_project {
@@ -70,15 +42,9 @@
 
   .project_disabled {
     opacity: 0.5;
-
   }
 
   .card {
-    background-color: white;
-    padding: 25px;
-    border: 1px solid #dfdfdf;
-    border-radius: 10px;
-
     .logo-project {
       display: flex;
       align-items: center;
@@ -90,7 +56,6 @@
       font-size: 18px;
       background-color: var(--primary);
     }
-
   }
 
   .project-list {
@@ -100,28 +65,10 @@
     list-style: none;
 
     .li-map a {
-      text-decoration: none;
-      color: inherit;
-      display: block;
-
-      .card {
-        transition: transform 0.15s ease, box-shadow 0.15s ease;
-      }
-
-      &:hover .card {
-        box-shadow: 0 4px 20px #dfdfdf;
-      }
-
       &:hover .card.project_disabled {
         box-shadow: none;
         transform: none;
       }
-
-      &:hover .icon-into_project {
-        color: black;
-      }
-
     }
   }
-
 }

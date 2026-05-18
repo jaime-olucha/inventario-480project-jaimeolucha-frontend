@@ -1,87 +1,87 @@
-.manage-sectors-modal {
+.manage-technologies-modal {
   max-width: 500px !important;
-  
+
   .modal_body {
-    padding: 20px;
     display: flex;
     flex-direction: column;
     gap: 20px;
+    padding: 20px;
   }
 
   .global-warning {
-    display: flex;
     align-items: flex-start;
-    gap: 10px;
-    padding: 12px 16px;
     background-color: #fffbeb;
     border: 1px solid #fef3c7;
     border-radius: 10px;
     color: #92400e;
+    display: flex;
+    gap: 10px;
+    padding: 12px 16px;
 
     svg {
-      margin-top: 2px;
       flex-shrink: 0;
+      margin-top: 2px;
     }
 
     p {
-      margin: 0;
       font-size: 13px;
       line-height: 1.5;
-      
+      margin: 0;
+
       strong {
         font-weight: 700;
       }
     }
   }
 
-  .add-sector-form {
+  .add-item-form {
     display: flex;
     gap: 10px;
 
     input {
-      flex: 1;
-      padding: 10px 14px;
-      border-radius: 10px;
-      border: 1px solid #e0e0e0;
       background-color: #f9fafb;
+      border: 1px solid #e0e0e0;
+      border-radius: 10px;
+      flex: 1;
       font-size: 14px;
+      padding: 10px 14px;
       transition: all 0.2s;
 
       &:focus {
-        outline: none;
-        border-color: var(--primary);
         background-color: white;
-        box-shadow: 0 0 0 3px rgba(0, 179, 65, 0.1);
+        border-color: #0891b2;
+        box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.1);
+        outline: none;
       }
     }
 
     .btn-add {
-      display: flex;
       align-items: center;
-      gap: 6px;
-      padding: 0 16px;
-      background-color: var(--primary);
-      color: white;
+      background-color: #0891b2;
       border: none;
       border-radius: 10px;
-      font-weight: 600;
-      font-size: 14px;
+      color: white;
       cursor: pointer;
+      display: flex;
+      font-size: 14px;
+      font-weight: 600;
+      gap: 6px;
+      padding: 0 16px;
       transition: all 0.2s;
 
       &:hover:not(:disabled) {
-        background-color: var(--primary-hover);
+        background-color: #0e7490;
         transform: translateY(-1px);
       }
 
       &:disabled {
-        opacity: 0.6;
         cursor: not-allowed;
+        opacity: 0.6;
       }
     }
   }
 
-  .sectors-list-container {
+  .items-list-container {
     max-height: 400px;
     overflow-y: auto;
     padding-right: 4px;
@@ -89,22 +89,23 @@
     &::-webkit-scrollbar {
       width: 6px;
     }
+
     &::-webkit-scrollbar-thumb {
       background: #e0e0e0;
       border-radius: 10px;
     }
   }
 
-  .sectors-list {
+  .items-list {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    padding: 0;
-    margin: 0;
     list-style: none;
+    margin: 0;
+    padding: 0;
   }
 
-  .sector-item {
+  .item {
     border: 1px solid #f0f0f0;
     border-radius: 12px;
     padding: 4px 12px;
@@ -115,30 +116,31 @@
       border-color: #e0e0e0;
     }
 
-    .view-mode, .edit-mode {
-      display: flex;
+    .view-mode,
+    .edit-mode {
       align-items: center;
+      display: flex;
       justify-content: space-between;
       min-height: 48px;
     }
 
-    .sector-name {
+    .item-name {
+      color: #0f172a;
       font-size: 15px;
       font-weight: 500;
-      color: var(--color-text-primary);
     }
 
     .edit-mode {
-      width: 100%;
       gap: 12px;
+      width: 100%;
 
       input {
-        flex: 1;
-        padding: 6px 10px;
+        border: 1px solid #0891b2;
         border-radius: 6px;
-        border: 1px solid var(--primary);
+        flex: 1;
         font-size: 14px;
-        
+        padding: 6px 10px;
+
         &:focus {
           outline: none;
         }
@@ -150,16 +152,16 @@
       gap: 4px;
 
       button {
-        width: 32px;
-        height: 32px;
-        display: flex;
         align-items: center;
-        justify-content: center;
-        border-radius: 8px;
-        border: none;
         background: transparent;
+        border: none;
+        border-radius: 8px;
         cursor: pointer;
+        display: flex;
+        height: 32px;
+        justify-content: center;
         transition: all 0.2s;
+        width: 32px;
 
         &.btn-edit {
           color: #64748b;
@@ -172,8 +174,8 @@
         }
 
         &.btn-save {
-          color: var(--primary);
-          &:hover { background-color: #f0fdf4; }
+          color: #0891b2;
+          &:hover { background-color: #ecfeff; }
         }
 
         &.btn-cancel {
@@ -185,13 +187,13 @@
   }
 
   .loading-state {
+    align-items: center;
+    color: #64748b;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    gap: 12px;
     justify-content: center;
     padding: 40px 0;
-    gap: 12px;
-    color: var(--color-text-secondary);
 
     .spinner {
       animation: spin 1s linear infinite;
