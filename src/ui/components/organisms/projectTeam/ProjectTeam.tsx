@@ -1,7 +1,7 @@
 import { useMemo, useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useParams } from "react-router-dom";
-import { Crown, KeyRound, Pencil, Search, ShieldAlert, UserPlus, Users2, X, Check, UserMinus, Code2 } from "lucide-react";
+import { Crown, KeyRound, Pencil, Search, ShieldAlert, UserPlus, Users2, X, Check, Code2, Trash2, UserX } from "lucide-react";
 import { useRepositories } from "@/infrastructure/RepositoryContext/RepositoryContext";
 import { useUserStore } from "@/infrastructure/store/user.store";
 import { SYSTEM_ROLES } from "@/domain/value-objects/SystemRole";
@@ -10,6 +10,7 @@ import { ConfirmModal } from "@/ui/components/molecules/confirmModal/ConfirmModa
 import { ActionButton } from "@/ui/components/molecules/actionButton/ActionButton";
 import { LogoUser } from "@/ui/components/logoUser/LogoUser";
 import { Toast } from "@/ui/components/molecules/toast/Toast";
+import { MenuOptions } from "@/ui/components/menuOptions/MenuOptions";
 import { getErrorMessage } from "@/infrastructure/helpers/getErrorMessage";
 import type { ProjectUser } from "@/domain/models/Project/ProjectUser";
 import type { ProjectRole } from "@/domain/models/Project/ProjectRole";
@@ -235,6 +236,22 @@ export const ProjectTeam = () => {
     }
   };
 
+  const inactivateMember = async (member: ProjectUser) => {
+    if (!id) return;
+
+    setSaving(true);
+
+    try {
+      await projectRepo.patchUserActive(id, member.userId, false);
+      await refreshTeam();
+      showToast(`${getFullName(member)} ha sido inactivado en el proyecto.`, "success");
+    } catch (err) {
+      showToast(getErrorMessage(err, "No se pudo inactivar al usuario en el proyecto."));
+    } finally {
+      setSaving(false);
+    }
+  };
+
   if (loading) {
     return (
       <section className="project-team">
@@ -416,12 +433,28 @@ export const ProjectTeam = () => {
 
                     {canEdit && (
                       <div className="member-actions">
-                        <button type="button" className="icon-button" onClick={() => openEditForm(member)} disabled={saving} aria-label="Editar rol">
-                          <Pencil size={16} />
-                        </button>
-                        <button type="button" className="icon-button icon-button--danger" onClick={() => deactivateMember(member)} disabled={saving} aria-label="Quitar del proyecto">
-                          <UserMinus size={16} />
-                        </button>
+                        <MenuOptions
+                          disabled={saving}
+                          items={[
+                            {
+                              label: "Editar",
+                              icon: <Pencil size={14} />,
+                              onClick: () => openEditForm(member),
+                            },
+                            {
+                              label: "Inactivar del proyecto",
+                              icon: <UserX size={14} />,
+                              variant: "warning",
+                              onClick: () => inactivateMember(member),
+                            },
+                            {
+                              label: "Eliminar",
+                              icon: <Trash2 size={14} />,
+                              variant: "danger",
+                              onClick: () => deactivateMember(member),
+                            },
+                          ]}
+                        />
                       </div>
                     )}
                   </div>

@@ -63,6 +63,7 @@
 
     &--danger {
       color: #dc2626;
+
       &:hover:not(:disabled) {
         background: #fef2f2;
         border-color: #fecaca;
@@ -214,7 +215,6 @@
   }
 
   .dev-card {
-    background: #f8fafc;
     border: 1px solid #e5e7eb;
     border-radius: 16px;
     display: flex;
@@ -285,14 +285,13 @@
       border: 1px solid #e2e8f0;
       border-radius: 10px;
       color: #334155;
-      display: inline-flex;
+      display: flex;
       font-size: 13px;
-      font-weight: 600;
+      font-weight: 500;
       gap: 6px;
       padding: 7px 12px;
       text-decoration: none;
       transition: all 0.18s;
-      width: fit-content;
 
       &:hover {
         background: #f1f5f9;
@@ -301,16 +300,61 @@
       }
     }
 
+    &__repo-url {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
     &__repo-icon {
       color: #94a3b8;
-      margin-left: auto;
+      flex-shrink: 0;
     }
 
     &__envs {
       display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
+      flex-direction: column;
+      gap: 6px;
       margin-top: 4px;
+    }
+
+    &__env-row {
+      align-items: center;
+      background: #f8fafc;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      display: flex;
+      gap: 8px;
+      padding: 6px 10px;
+      text-decoration: none;
+      transition: background 0.18s, border-color 0.18s;
+
+      &:hover {
+        background: #f1f5f9;
+        border-color: #cbd5e1;
+      }
+
+      .env-badge {
+        flex-shrink: 0;
+      }
+    }
+
+    &__env-url {
+      color: #475569;
+      flex: 1;
+      font-size: 12px;
+      font-weight: 500;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    &__env-icon {
+      color: #94a3b8;
+      flex-shrink: 0;
     }
 
     &__no-envs {
@@ -374,18 +418,38 @@
   // @keyframes shimmer en src/ui/styles/base/_animations.scss
 
   .empty-state {
-    &--error { color: #b91c1c; }
+    &--error {
+      color: #b91c1c;
+    }
   }
 
   .skeleton {
-    &--title { height: 24px; width: 50%; }
-    &--short { width: 35%; }
-    &--dev-card { border-radius: 16px; height: 180px; }
+    &--title {
+      height: 24px;
+      width: 50%;
+    }
+
+    &--short {
+      width: 35%;
+    }
+
+    &--dev-card {
+      border-radius: 16px;
+      height: 180px;
+    }
   }
 
   @media (max-width: 900px) {
-    .card-header { flex-direction: column; }
-    .dev-grid { grid-template-columns: 1fr; }
-    .dev-form-grid { grid-template-columns: 1fr; }
+    .card-header {
+      flex-direction: column;
+    }
+
+    .dev-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .dev-form-grid {
+      grid-template-columns: 1fr;
+    }
   }
 }

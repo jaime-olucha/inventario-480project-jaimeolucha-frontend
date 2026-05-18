@@ -7,6 +7,6 @@ export interface DevelopmentDTO {
   name: string;
   description?: string;
   technology: TechnologyDTO;
-  url_Repository: string
+  url_repository: string
   links: LinkDTO[];
 }

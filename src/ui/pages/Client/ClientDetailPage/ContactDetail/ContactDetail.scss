@@ -66,6 +66,7 @@
     padding-bottom: 16px;
     overflow: visible;
   }
+
   .empty-contacts {
     padding: 14px;
     background: white;
@@ -173,6 +174,7 @@
     border: 1px solid #dbe5ee;
     color: var(--color-text-secondary);
   }
+
   .contacts-list {
     display: flex;
     flex-direction: column;
@@ -256,8 +258,7 @@
     position: relative;
   }
 
-  .btn-note,
-  .btn-contact-action {
+  .btn-note {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -290,26 +291,6 @@
       opacity: 0.45;
       cursor: not-allowed;
     }
-  }
-
-  .btn-contact-action {
-    width: 34px;
-    height: 34px;
-    background: white;
-    border: 1px solid #e2e8f0;
-    color: var(--color-text-secondary);
-  }
-
-  .btn-contact-edit:hover {
-    color: var(--primary);
-    border-color: var(--primary);
-    background: #f0fdf4;
-  }
-
-  .btn-contact-delete:hover {
-    color: #c0392b;
-    border-color: #f1c7c7;
-    background: #fff7f7;
   }
 
   .note-bubble {

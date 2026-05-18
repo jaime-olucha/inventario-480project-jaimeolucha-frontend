@@ -67,7 +67,7 @@ export const ClientPage = () => {
     if (!btn) return;
     const observer = new IntersectionObserver(
       ([entry]) => setShowFab(!entry.isIntersecting),
-      { threshold: 0 }
+      { threshold: 0, rootMargin: '-60px 0px 0px 0px' }
     );
     observer.observe(btn);
     return () => observer.disconnect();

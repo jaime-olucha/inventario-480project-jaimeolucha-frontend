@@ -11,6 +11,7 @@ import { getErrorMessage } from "@/infrastructure/helpers/getErrorMessage";
 import { ConfirmModal } from "@/ui/components/molecules/confirmModal/ConfirmModal";
 import { ActionButton } from "@/ui/components/molecules/actionButton/ActionButton";
 import { Toast } from "@/ui/components/molecules/toast/Toast";
+import { MenuOptions } from "@/ui/components/menuOptions/MenuOptions";
 import type { ProjectTimeEntry } from "@/domain/models/Project/ProjectTimeEntry";
 import type { EntityId } from "@/domain/value-objects/EntityId";
 import "@/ui/components/molecules/confirmModal/ConfirmModal.scss";
@@ -334,26 +335,13 @@ export const ProjectHours = () => {
                       <td className="cell-comment">{entry.comment || <span className="no-comment">—</span>}</td>
                       <td className="cell-actions">
                         {modifiable && (
-                          <>
-                            <button
-                              type="button"
-                              className="icon-button"
-                              onClick={() => openEdit(entry)}
-                              disabled={saving}
-                              aria-label="Editar"
-                            >
-                              <Pencil size={15} />
-                            </button>
-                            <button
-                              type="button"
-                              className="icon-button icon-button--danger"
-                              onClick={() => setEntryToDelete(entry)}
-                              disabled={saving}
-                              aria-label="Eliminar"
-                            >
-                              <Trash2 size={15} />
-                            </button>
-                          </>
+                          <MenuOptions
+                            disabled={saving}
+                            items={[
+                              { label: "Editar", icon: <Pencil size={14} />, onClick: () => openEdit(entry) },
+                              { label: "Eliminar", icon: <Trash2 size={14} />, variant: "danger", onClick: () => setEntryToDelete(entry) },
+                            ]}
+                          />
                         )}
                       </td>
                     </tr>

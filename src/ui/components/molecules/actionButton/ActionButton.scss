@@ -12,7 +12,8 @@
   justify-content: center;
   line-height: 1;
   min-height: 36px;
-  padding: 8px 14px;
+  height: fit-content;
+  padding: 13px 14px;
   transition: background-color 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
   white-space: nowrap;
 
@@ -38,18 +39,18 @@
     font-weight: 600;
     gap: 6px;
     min-height: 32px;
-    padding: 6px 10px;
+    padding: 10px 14px;
   }
 
   &--fab {
     border-radius: 50%;
-    bottom: 28px;
+    bottom: 30px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
     height: 52px;
     min-height: 52px;
-    padding: 0;
+    padding-right: 6px;
     position: fixed;
-    right: 28px;
+    right: 30px;
     width: 52px;
     z-index: 50;
 
