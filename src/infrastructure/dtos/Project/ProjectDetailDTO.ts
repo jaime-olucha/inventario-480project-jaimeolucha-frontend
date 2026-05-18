@@ -2,5 +2,8 @@
 import type { ProjectDTO } from "./ProjectDTO";
 
 export interface ProjectDetailDTO extends ProjectDTO {
-  editable: boolean;
+  permissions: {
+    can_edit: boolean;
+    can_delete: boolean;
+  };
 }

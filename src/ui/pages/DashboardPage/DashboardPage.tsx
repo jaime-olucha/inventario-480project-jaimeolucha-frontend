@@ -2,6 +2,9 @@ import { Link } from "react-router-dom";
 import { useUserStore } from "../../../infrastructure/store/user.store";
 import { useRepositories } from "../../../infrastructure/RepositoryContext/RepositoryContext";
 import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import type { UserProject } from "@/domain/models/User/UserProject";
 import type { UserTimeEntry } from "@/domain/models/User/UserTimeEntry";
 import { getWeeklyHours } from "@/infrastructure/helpers/getWeeklyHours";
@@ -14,17 +17,26 @@ import { LogoUser } from "@/ui/components/logoUser/LogoUser";
 const today = new Date().toISOString().split("T")[0];
 const PROJECT_COLORS = ["#00b341", "#3b82f6", "#f59e0b", "#8b5cf6", "#ec4899", "#06b6d4", "#f97316", "#14b8a6"];
 
+const timeEntrySchema = z.object({
+  projectId: z.string().min(1, "Selecciona un proyecto"),
+  date: z.string().min(1, "La fecha es obligatoria"),
+  hours: z.string().refine((v) => Number(v) > 0, { message: "Introduce un número de horas válido" }),
+  comment: z.string().optional(),
+});
+
+type TimeEntryForm = z.infer<typeof timeEntrySchema>;
+
 export const DashboardPage = () => {
   const userStore = useUserStore((store) => store.user);
   const { user: userRepo } = useRepositories();
   const [projects, setProjects] = useState<UserProject[]>([]);
   const [timeEntries, setTimeEntries] = useState<UserTimeEntry[]>([]);
-  const [selectedProjectId, setSelectedProjectId] = useState("");
-  const [entryDate, setEntryDate] = useState(today);
-  const [entryHours, setEntryHours] = useState("");
-  const [entryComment, setEntryComment] = useState("");
   const [isSubmittingHours, setIsSubmittingHours] = useState(false);
-  const [hoursError, setHoursError] = useState("");
+
+  const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<TimeEntryForm>({
+    resolver: zodResolver(timeEntrySchema),
+    defaultValues: { projectId: "", date: today, hours: "", comment: "" },
+  });
 
   const weeklyHours = getWeeklyHours(timeEntries);
   const totalHours = weeklyHours.reduce((sum, day) => sum + day.total, 0);
@@ -40,44 +52,31 @@ export const DashboardPage = () => {
 
     userRepo.getProjects(userStore.id).then((userProjects) => {
       setProjects(userProjects);
-      setSelectedProjectId((currentProjectId) => currentProjectId || String(userProjects[0]?.id ?? ""));
+      setValue("projectId", String(userProjects[0]?.id ?? ""));
     });
     userRepo.getTimeEntries(userStore.id).then(setTimeEntries);
 
   }, [userStore, userRepo]);
 
-  const handleSubmitHours = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleSubmitHours = handleSubmit(async (data) => {
     if (!userStore) return;
-
-    const parsedHours = Number(entryHours);
-
-    if (!selectedProjectId || !entryDate || !entryHours || parsedHours <= 0) {
-      setHoursError("Selecciona un proyecto, fecha y horas válidas.");
-      return;
-    }
-
     setIsSubmittingHours(true);
-    setHoursError("");
-
     try {
       await userRepo.createTimeEntry(userStore.id, {
-        projectId: selectedProjectId,
-        date: entryDate,
-        hours: parsedHours,
-        comment: entryComment,
+        projectId: data.projectId,
+        date: data.date,
+        hours: Number(data.hours),
+        comment: data.comment ?? "",
       });
-
       const updatedTimeEntries = await userRepo.getTimeEntries(userStore.id);
       setTimeEntries(updatedTimeEntries);
-      setEntryHours("");
-      setEntryComment("");
+      reset({ projectId: data.projectId, date: today, hours: "", comment: "" });
     } catch {
-      setHoursError("No se han podido imputar las horas.");
+      // error shown via form errors
     } finally {
       setIsSubmittingHours(false);
     }
-  };
+  });
 
   return (
     <section className="dashboard-page">
@@ -142,38 +141,39 @@ export const DashboardPage = () => {
         <form className="time-entry-form" onSubmit={handleSubmitHours}>
           <div className="form-group">
             <label htmlFor="time-entry-project">Proyecto</label>
-            <select id="time-entry-project" value={selectedProjectId} onChange={(event) => setSelectedProjectId(event.target.value)} disabled={projects.length === 0 || isSubmittingHours}>
+            <select id="time-entry-project" disabled={projects.length === 0 || isSubmittingHours} {...register("projectId")}>
               {projects.length === 0 ? (
                 <option value="">No tienes proyectos asignados</option>
               ) : (
                 projects.map((project) => (
-                  <option key={project.id} value={project.id}>
-                    {project.name}
-                  </option>
+                  <option key={project.id} value={project.id}>{project.name}</option>
                 ))
               )}
             </select>
+            {errors.projectId && <p className="time-entry-error">{errors.projectId.message}</p>}
           </div>
 
           <div className="form-group">
             <label htmlFor="time-entry-date">Fecha</label>
             <div className="input-with-icon">
               <CalendarDays size={16} />
-              <input id="time-entry-date" type="date" value={entryDate} onChange={(event) => setEntryDate(event.target.value)} disabled={isSubmittingHours} />
+              <input id="time-entry-date" type="date" disabled={isSubmittingHours} {...register("date")} />
             </div>
+            {errors.date && <p className="time-entry-error">{errors.date.message}</p>}
           </div>
 
           <div className="form-group">
             <label htmlFor="time-entry-hours">Horas</label>
             <div className="input-with-icon">
               <Clock size={16} />
-              <input id="time-entry-hours" type="number" min="0.25" step="0.25" value={entryHours} onChange={(event) => setEntryHours(event.target.value)} placeholder="Ej. 7.5" disabled={isSubmittingHours} />
+              <input id="time-entry-hours" type="number" min="0.25" step="0.25" placeholder="Ej. 7.5" disabled={isSubmittingHours} {...register("hours")} />
             </div>
+            {errors.hours && <p className="time-entry-error">{errors.hours.message}</p>}
           </div>
 
           <div className="form-group">
             <label htmlFor="time-entry-comment">Comentario</label>
-            <input id="time-entry-comment" type="text" value={entryComment} onChange={(event) => setEntryComment(event.target.value)} placeholder="Ej. Revisión de PRs" disabled={isSubmittingHours} />
+            <input id="time-entry-comment" type="text" placeholder="Ej. Revisión de PRs" disabled={isSubmittingHours} {...register("comment")} />
           </div>
 
           <button className="btn-submit-hours" type="submit" disabled={projects.length === 0 || isSubmittingHours}>
@@ -181,8 +181,6 @@ export const DashboardPage = () => {
             {isSubmittingHours ? "Imputando..." : "Imputar"}
           </button>
         </form>
-
-        {hoursError && <p className="time-entry-error">{hoursError}</p>}
 
         <div className="weekly-hours">
           {weeklyHours.map((day) => {

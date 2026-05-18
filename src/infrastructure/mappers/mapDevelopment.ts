@@ -22,5 +22,5 @@ export const mapDevelopment = (dto: DevelopmentDTO): Development => ({
   description: dto.description,
   technology: mapTechnology(dto.technology),
   urlRepository: dto.url_Repository,
-  links: mapLink(dto.links),
+  links: dto.links.map(mapLink),
 })

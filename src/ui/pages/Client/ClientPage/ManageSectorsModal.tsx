@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import { X, Plus, Edit2, Trash2, Save, ListTree, Loader2, AlertCircle } from "lucide-react";
 import { useRepositories } from "@/infrastructure/RepositoryContext/RepositoryContext";
 import { getErrorMessage } from "@/infrastructure/helpers/getErrorMessage";
@@ -18,12 +19,13 @@ export const ManageSectorsModal = ({ onClose, onSectorsChanged, onSuccess }: Man
   const { sector: sectorRepo } = useRepositories();
   const [sectors, setSectors] = useState<Sector[]>([]);
   const [loading, setLoading] = useState(true);
-  const [newSectorName, setNewSectorName] = useState("");
   const [editingId, setEditingId] = useState<EntityId | null>(null);
-  const [editingName, setEditingName] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
   const [sectorToDelete, setSectorToDelete] = useState<Sector | null>(null);
+
+  const addForm = useForm<{ name: string }>({ defaultValues: { name: "" } });
+  const editForm = useForm<{ name: string }>({ defaultValues: { name: "" } });
 
   const fetchSectors = async () => {
     setLoading(true);
@@ -39,40 +41,37 @@ export const ManageSectorsModal = ({ onClose, onSectorsChanged, onSuccess }: Man
     fetchSectors();
   }, []);
 
-  const handleCreate = async () => {
-    if (!newSectorName.trim()) return;
+  const handleCreate = addForm.handleSubmit(async ({ name }) => {
     setActionLoading(true);
     try {
-      await sectorRepo.create(newSectorName.trim());
-      setNewSectorName("");
+      await sectorRepo.create(name.trim());
+      addForm.reset({ name: "" });
       await fetchSectors();
       onSectorsChanged();
       onSuccess?.("Sector creado correctamente");
       onClose();
     } catch (error) {
-      setToast({ message: getErrorMessage(error), type: "error" });
+      setToast({ message: getErrorMessage(error, "No se pudo crear el sector."), type: "error" });
     } finally {
       setActionLoading(false);
     }
-  };
+  });
 
-  const handleUpdate = async (id: EntityId) => {
-    if (!editingName.trim()) return;
+  const handleUpdate = (id: EntityId) => editForm.handleSubmit(async ({ name }) => {
     setActionLoading(true);
     try {
-      await sectorRepo.update(id, editingName.trim());
+      await sectorRepo.update(id, name.trim());
       setEditingId(null);
       await fetchSectors();
       onSectorsChanged();
       onSuccess?.("Sector actualizado correctamente");
       onClose();
     } catch (error) {
-      setToast({ message: getErrorMessage(error), type: "error" });
-      console.log(error.message)
+      setToast({ message: getErrorMessage(error, "No se pudo actualizar el sector."), type: "error" });
     } finally {
       setActionLoading(false);
     }
-  };
+  })();
 
   const handleDeleteClick = (sector: Sector) => {
     setSectorToDelete(sector);
@@ -88,8 +87,7 @@ export const ManageSectorsModal = ({ onClose, onSectorsChanged, onSuccess }: Man
       onSuccess?.("Sector eliminado correctamente");
       onClose();
     } catch (error) {
-      setToast({ message: getErrorMessage(error), type: "error" });
-
+      setToast({ message: getErrorMessage(error, "No se pudo eliminar el sector."), type: "error" });
     } finally {
       setActionLoading(false);
       setSectorToDelete(null);
@@ -98,7 +96,7 @@ export const ManageSectorsModal = ({ onClose, onSectorsChanged, onSuccess }: Man
 
   const startEditing = (sector: Sector) => {
     setEditingId(sector.id);
-    setEditingName(sector.name);
+    editForm.reset({ name: sector.name });
   };
 
   return (
@@ -131,11 +129,10 @@ export const ManageSectorsModal = ({ onClose, onSectorsChanged, onSuccess }: Man
             <input
               type="text"
               placeholder="Nuevo sector..."
-              value={newSectorName}
-              onChange={e => setNewSectorName(e.target.value)}
               disabled={actionLoading}
+              {...addForm.register("name", { required: true })}
             />
-            <button className="btn-add" onClick={handleCreate} disabled={actionLoading || !newSectorName.trim()}>
+            <button className="btn-add" onClick={handleCreate} disabled={actionLoading || !addForm.watch("name")?.trim()}>
               <Plus size={18} /> Añadir
             </button>
           </div>
@@ -154,9 +151,8 @@ export const ManageSectorsModal = ({ onClose, onSectorsChanged, onSuccess }: Man
                       <div className="edit-mode">
                         <input
                           type="text"
-                          value={editingName}
-                          onChange={e => setEditingName(e.target.value)}
                           autoFocus
+                          {...editForm.register("name", { required: true })}
                         />
                         <div className="item-actions">
                           <button className="btn-save" onClick={() => handleUpdate(sector.id)} disabled={actionLoading}>

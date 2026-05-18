@@ -8,6 +8,9 @@ import type { ProjectRoleDTO } from "@/infrastructure/dtos/Project/ProjectRoleDT
 import type { ProjectRole } from "../../domain/models/Project/ProjectRole";
 import type { ProjectUserDTO } from "@/infrastructure/dtos/Project/ProjectUserDTO";
 import type { ProjectUser } from "../../domain/models/Project/ProjectUser";
+import type { UpdateProjectRequest } from "@/domain/models/Project/UpdateProjectRequest";
+import type { UpdateProjectRequestDTO } from "../dtos/Project/UpdateProjectRequestDTO";
+import { normalizeRoleName } from "@/domain/value-objects/ProjectRole";
 
 
 export const mapProject = (dto: ProjectDTO): Project => ({
@@ -27,12 +30,15 @@ export const mapProjectListItem = (dto: ProjectListItemDTO): ProjectListItem => 
 
 export const mapProjectDetail = (dto: ProjectDetailDTO): ProjectDetail => ({
   ...mapProject(dto),
-  editable: dto.editable,
+  permissions: {
+    canEdit: dto.permissions?.can_edit ?? true,
+    canDelete: dto.permissions?.can_delete ?? true,
+  },
 });
 
 export const mapProjectRole = (dto: ProjectRoleDTO): ProjectRole => ({
   id: dto.id,
-  name: dto.name,
+  name: normalizeRoleName(dto.name),
 })
 
 export const mapProjectUser = (dto: ProjectUserDTO): ProjectUser => ({
@@ -40,4 +46,13 @@ export const mapProjectUser = (dto: ProjectUserDTO): ProjectUser => ({
   name: dto.name,
   surname: dto.surname,
   role: mapProjectRole(dto.role),
+  isActive: dto.is_user_active ?? dto.is_active ?? true,
+})
+
+export const mapUpdateProject = (request: UpdateProjectRequest): UpdateProjectRequestDTO => ({
+  name: request.name,
+  description: request.description,
+  start_date: request.startDate,
+  is_active: request.isActive,
+  client_id: request.clientId
 })

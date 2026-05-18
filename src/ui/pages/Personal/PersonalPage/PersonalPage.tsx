@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+﻿import { Link } from "react-router-dom";
 import type { User } from "@/domain/models/User/User";
 import type { CreateUserRequest } from "@/domain/models/User/CreateUserRequest";
 import { useRepositories } from "@/infrastructure/RepositoryContext/RepositoryContext";
@@ -12,10 +12,12 @@ import { FiltersCard } from "@/ui/components/organisms/filtersCard/FiltersCard";
 import { FilterSelect } from "@/ui/components/molecules/filterSelect/FilterSelect";
 import { usePersonalFilters, ROLE_OPTIONS } from "../../../hooks/usePersonalFilters";
 import { usePagination } from "../../../hooks/usePagination";
-import { PaginationControls } from "../../../components/PaginationControls/PaginationControls";
+import { PaginationControls } from "../../../components/organisms/paginationControls/PaginationControls";
 import './PersonalPage.scss';
 import { LogoUser } from "@/ui/components/logoUser/LogoUser";
+import { StatusBadge } from "@/ui/components/molecules/statusBadge/StatusBadge";
 import { ROUTES } from "@/ui/routes/routes";
+import { ActionButton } from "@/ui/components/molecules/actionButton/ActionButton";
 
 const PAGE_LIMIT = 20;
 
@@ -76,9 +78,9 @@ export const PersonalPage = () => {
           <h1>Personal</h1>
           <p className="info">Gestiona el personal de la empresa</p>
         </div>
-        <button ref={addBtnRef} className="add_record" onClick={() => setIsModalOpen(true)}>
-          <UserPlus className="iconBtn" /> Nuevo Personal
-        </button>
+        <ActionButton ref={addBtnRef} compact icon={<UserPlus size={20} />} onClick={() => setIsModalOpen(true)}>
+          Nuevo Personal
+        </ActionButton>
       </div>
 
       {isModalOpen && (
@@ -115,7 +117,7 @@ export const PersonalPage = () => {
                 <div className="card-user_info">
                   <h2 className="card-user_label">
                     {user.name} {user.surname} {getRoleBadge(user.role) && <span className="card_badge">{getRoleBadge(user.role)}</span>}
-                    {!user.isActive && <span className="card_badge badge-inactive">INACTIVO</span>}
+                    <StatusBadge isActive={user.isActive} onlyInactive />
                   </h2>
                   <p className="info"><strong>Correo: </strong>{user.email}</p>
                 </div>
@@ -129,10 +131,11 @@ export const PersonalPage = () => {
       <PaginationControls page={page} isFirst={isFirst} isLast={isLast} onPrev={goPrev} onNext={goNext} />
 
       {showFab && (
-        <button className="add_record add_record--fab" onClick={() => setIsModalOpen(true)}>
-          <UserPlus className="iconBtn" />
-        </button>
+        <ActionButton className="action-button--fab" icon={<UserPlus size={20} />} onClick={() => setIsModalOpen(true)}>
+          <span className="sr-only">Nuevo Personal</span>
+        </ActionButton>
       )}
     </section>
   );
 };
+

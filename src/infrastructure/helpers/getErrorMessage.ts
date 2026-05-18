@@ -1,10 +1,6 @@
-export const getErrorMessage = (err: any) => {
-  if (err && err.message) {
-
-    if (!err.message.startsWith('HTTP')) {
-      return err.message;
-    }
+export const getErrorMessage = (err: unknown, fallback = "Algo salió mal. Inténtalo de nuevo."): string => {
+  if (err instanceof Error && err.message && !err.message.startsWith("HTTP")) {
+    return err.message;
   }
-
-  return "Ocurrió un error inesperado al procesar la solicitud.";
+  return fallback;
 };

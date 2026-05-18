@@ -7,4 +7,6 @@ export interface ProjectUserDTO {
   name: string;
   surname: string;
   role: ProjectRoleDTO;
+  is_active?: boolean;
+  is_user_active?: boolean;
 }

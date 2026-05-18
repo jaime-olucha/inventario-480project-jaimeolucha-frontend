@@ -7,4 +7,5 @@ export interface ProjectUser {
   name: string;
   surname: string;
   role: ProjectRole;
+  isActive: boolean;
 }

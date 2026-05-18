@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+﻿import { Link } from "react-router-dom";
 import { useRepositories } from "@/infrastructure/RepositoryContext/RepositoryContext";
 import { useUserStore } from "@/infrastructure/store/user.store";
 import { Building2, Plus } from "lucide-react";
@@ -8,7 +8,7 @@ import { FilterSelect } from "@/ui/components/molecules/filterSelect/FilterSelec
 import type { Sector } from "@/domain/models/Client/Sector";
 import { FiltersCard } from "@/ui/components/organisms/filtersCard/FiltersCard";
 import { usePagination } from "../../../hooks/usePagination";
-import { PaginationControls } from "../../../components/PaginationControls/PaginationControls";
+import { PaginationControls } from "../../../components/organisms/paginationControls/PaginationControls";
 import './ClientPage.scss';
 import { ROUTES } from "@/ui/routes/routes";
 import type { Client } from "@/domain/models/Client/Client";
@@ -17,6 +17,8 @@ import type { CreateClientRequest } from "@/domain/models/Client/CreateClientReq
 import { CreateClientModal } from "./CreateClientModal";
 import { Toast } from "@/ui/components/molecules/toast/Toast";
 import { getErrorMessage } from "@/infrastructure/helpers/getErrorMessage";
+import { StatusBadge } from "@/ui/components/molecules/statusBadge/StatusBadge";
+import { ActionButton } from "@/ui/components/molecules/actionButton/ActionButton";
 
 const PAGE_LIMIT = 20;
 
@@ -79,7 +81,7 @@ export const ClientPage = () => {
       setIsLast(result.length < limit);
       setToast({ message: "Cliente creado correctamente", type: "success" });
     } catch (error) {
-      setToast({ message: getErrorMessage(error), type: "error" });
+      setToast({ message: getErrorMessage(error, "No se pudo crear el cliente."), type: "error" });
     }
   };
 
@@ -91,9 +93,9 @@ export const ClientPage = () => {
           <h1>Clientes</h1>
           <p className="info">Gestiona los clientes de la empresa</p>
         </div>
-        <button ref={addBtnRef} className="add_record" onClick={() => setIsModalOpen(true)}>
-          <Plus className="iconBtn" /> Nuevo Cliente
-        </button>
+        <ActionButton ref={addBtnRef} compact icon={<Plus size={20} />} onClick={() => setIsModalOpen(true)}>
+          Nuevo Cliente
+        </ActionButton>
       </div>
 
       {isModalOpen && (
@@ -130,14 +132,14 @@ export const ClientPage = () => {
         {filtered.map((client) => (
           <li className="li-map" key={client.id}>
             <Link to={ROUTES.CLIENTS.BY_ID(client.id)}>
-              <article className={`card card_client ${!client.isActive ? 'project_disabled' : ''}`}>
+              <article className={`card card_client ${!client.isActive ? 'client_disabled' : ''}`}>
                 <div className="logo-client">
                   <Building2 size={32} />
                 </div>
                 <div className="card-user_info">
                   <h2 className="card-client_label">
                     {client.name}
-                    {!client.isActive && <span className="card_badge badge-inactive">INACTIVO</span>}
+                    <StatusBadge isActive={client.isActive} onlyInactive />
                   </h2>
                   <p className="info"><strong>Sector: </strong>{client.sectorName}</p>
                 </div>
@@ -151,10 +153,11 @@ export const ClientPage = () => {
       <PaginationControls page={page} isFirst={isFirst} isLast={isLast} onPrev={goPrev} onNext={goNext} />
 
       {showFab && (
-        <button className="add_record add_record--fab" onClick={() => setIsModalOpen(true)}>
-          <Plus className="iconBtn" />
-        </button>
+        <ActionButton className="action-button--fab" icon={<Plus size={20} />} onClick={() => setIsModalOpen(true)}>
+          <span className="sr-only">Nuevo Cliente</span>
+        </ActionButton>
       )}
     </section>
   );
 };
+

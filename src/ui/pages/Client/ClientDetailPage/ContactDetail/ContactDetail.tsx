@@ -1,12 +1,27 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { ChevronDown, Edit2, Mail, Phone, StickyNote, Trash2, UserPlus, Users } from "lucide-react";
 import { getErrorMessage } from "@/infrastructure/helpers/getErrorMessage";
 import { useRepositories } from "@/infrastructure/RepositoryContext/RepositoryContext";
-import type { Contact, CreateContactRequest } from "@/domain/models/Client/Contact";
+import type { Contact } from "@/domain/models/Client/Contact";
 import type { EntityId } from "@/domain/value-objects/EntityId";
 import { ConfirmModal } from "@/ui/components/molecules/confirmModal/ConfirmModal";
+import { ActionButton } from "@/ui/components/molecules/actionButton/ActionButton";
 import "@/ui/components/molecules/confirmModal/ConfirmModal.scss";
 import "./ContactDetail.scss";
+
+const contactSchema = z.object({
+  fullName: z.string().min(1, "El nombre es obligatorio"),
+  phone: z.string().optional(),
+  email: z.string().min(1, "El email es obligatorio").email("Email no válido"),
+  isActive: z.boolean(),
+  isMain: z.boolean(),
+  note: z.string().optional(),
+});
+
+type ContactForm = z.infer<typeof contactSchema>;
 
 interface ContactDetailProps {
   clientId: EntityId;
@@ -14,7 +29,7 @@ interface ContactDetailProps {
   onToast: (message: string, type: "success" | "error") => void;
 }
 
-const EMPTY_CONTACT_FORM: CreateContactRequest = {
+const EMPTY_CONTACT_FORM: ContactForm = {
   fullName: "",
   phone: "",
   email: "",
@@ -31,9 +46,13 @@ export const ContactDetail = ({ clientId, isAdmin, onToast }: ContactDetailProps
   const [editingContactId, setEditingContactId] = useState<EntityId | null>(null);
   const [isContactFormOpen, setIsContactFormOpen] = useState(false);
   const [loadingContact, setLoadingContact] = useState(false);
-  const [contactForm, setContactForm] = useState<CreateContactRequest>(EMPTY_CONTACT_FORM);
   const [contactToDelete, setContactToDelete] = useState<Contact | null>(null);
-  const [mainContactToReplace, setMainContactToReplace] = useState<Contact | null>(null);
+  const [mainContactToReplace, setMainContactToReplace] = useState<{ data: ContactForm; id: EntityId | null } | null>(null);
+
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<ContactForm>({
+    resolver: zodResolver(contactSchema),
+    defaultValues: EMPTY_CONTACT_FORM,
+  });
 
   useEffect(() => {
     contactRepo.getContacts(clientId).then(setContacts);
@@ -59,24 +78,19 @@ export const ContactDetail = ({ clientId, isAdmin, onToast }: ContactDetailProps
   const resetContactForm = () => {
     setEditingContactId(null);
     setIsContactFormOpen(false);
-    setContactForm(EMPTY_CONTACT_FORM);
-  };
-
-  const handleContactInputChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value, type } = event.target;
-    const checked = type === "checkbox" ? (event.target as HTMLInputElement).checked : false;
-    setContactForm((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
+    reset(EMPTY_CONTACT_FORM);
   };
 
   const handleCreateContactClick = () => {
-    resetContactForm();
+    setEditingContactId(null);
+    reset(EMPTY_CONTACT_FORM);
     setActiveNoteContactId(null);
     setIsContactFormOpen(true);
   };
 
   const handleEditContactClick = (contact: Contact) => {
     setEditingContactId(contact.id);
-    setContactForm({
+    reset({
       fullName: contact.fullName,
       phone: contact.phone ?? "",
       email: contact.email,
@@ -93,20 +107,20 @@ export const ContactDetail = ({ clientId, isAdmin, onToast }: ContactDetailProps
     setContacts(nextContacts);
   };
 
-  const saveContact = async (replaceMainContact = false) => {
+  const saveContact = async (data: ContactForm, replaceMainContact = false) => {
     setLoadingContact(true);
 
     const contactData = {
-      ...contactForm,
-      phone: contactForm.phone || undefined,
-      note: contactForm.note ?? "",
+      ...data,
+      phone: data.phone || undefined,
+      note: data.note ?? "",
     };
 
     try {
       const currentMainContact = contacts.find((contact) => contact.isMain && contact.id !== editingContactId);
 
       if (contactData.isMain && currentMainContact && !replaceMainContact) {
-        setMainContactToReplace(currentMainContact);
+        setMainContactToReplace({ data, id: editingContactId });
         return;
       }
 
@@ -126,19 +140,17 @@ export const ContactDetail = ({ clientId, isAdmin, onToast }: ContactDetailProps
       resetContactForm();
       setMainContactToReplace(null);
     } catch (err) {
-      onToast(getErrorMessage(err), "error");
+      onToast(getErrorMessage(err, "No se pudo guardar el contacto."), "error");
     } finally {
       setLoadingContact(false);
     }
   };
 
-  const handleSaveContact = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    await saveContact();
-  };
+  const handleSaveContact = handleSubmit((data) => saveContact(data));
 
   const handleConfirmReplaceMainContact = async () => {
-    await saveContact(true);
+    if (!mainContactToReplace) return;
+    await saveContact(mainContactToReplace.data, true);
   };
 
   const handleConfirmDeleteContact = async () => {
@@ -151,7 +163,7 @@ export const ContactDetail = ({ clientId, isAdmin, onToast }: ContactDetailProps
       onToast("Contacto eliminado correctamente", "success");
       if (editingContactId === contactToDelete.id) resetContactForm();
     } catch (err) {
-      onToast(getErrorMessage(err), "error");
+      onToast(getErrorMessage(err, "No se pudo eliminar el contacto."), "error");
     } finally {
       setLoadingContact(false);
       setContactToDelete(null);
@@ -168,7 +180,7 @@ export const ContactDetail = ({ clientId, isAdmin, onToast }: ContactDetailProps
       {mainContactToReplace && (
         <ConfirmModal
           title="Cambiar contacto principal"
-          message={`Ya existe un contacto principal (${mainContactToReplace.fullName}). Si continúas, se quitará como principal y este contacto pasará a ser el principal.`}
+          message={`Ya existe un contacto principal. Si continúas, se quitará como principal y este contacto pasará a ser el principal.`}
           confirmLabel="Continuar"
           loading={loadingContact}
           onConfirm={handleConfirmReplaceMainContact}
@@ -208,9 +220,9 @@ export const ContactDetail = ({ clientId, isAdmin, onToast }: ContactDetailProps
       <div className="contacts-panel_content">
         <div className="contacts-panel_inner">
           {isAdmin && (
-            <button className="btn-create-contact" onClick={handleCreateContactClick}>
-              <UserPlus size={16} /> Nuevo contacto
-            </button>
+            <ActionButton compact icon={<UserPlus size={16} />} onClick={handleCreateContactClick}>
+              Nuevo contacto
+            </ActionButton>
           )}
 
           {isAdmin && isContactFormOpen && (
@@ -218,34 +230,34 @@ export const ContactDetail = ({ clientId, isAdmin, onToast }: ContactDetailProps
               <div className="contact-form_grid">
                 <div className="form-group">
                   <label htmlFor="contactFullName">Nombre</label>
-                  <input id="contactFullName" name="fullName" value={contactForm.fullName} onChange={handleContactInputChange} className="edit-input" required />
+                  <input id="contactFullName" className={`edit-input ${errors.fullName ? "edit-input--error" : ""}`} {...register("fullName")} />
+                  {errors.fullName && <span className="field-error">{errors.fullName.message}</span>}
                 </div>
                 <div className="form-group">
                   <label htmlFor="contactPhone">Teléfono</label>
-                  <input id="contactPhone" name="phone" value={contactForm.phone} onChange={handleContactInputChange} className="edit-input" />
+                  <input id="contactPhone" className="edit-input" {...register("phone")} />
                 </div>
                 <div className="form-group">
                   <label htmlFor="contactEmail">Email</label>
-                  <input id="contactEmail" name="email" type="email" value={contactForm.email} onChange={handleContactInputChange} className="edit-input" required />
+                  <input id="contactEmail" type="email" className={`edit-input ${errors.email ? "edit-input--error" : ""}`} {...register("email")} />
+                  {errors.email && <span className="field-error">{errors.email.message}</span>}
                 </div>
               </div>
 
               <div className="form-group">
                 <label htmlFor="contactNote">Nota</label>
-                <textarea id="contactNote" name="note" value={contactForm.note} onChange={handleContactInputChange} className="edit-input contact-textarea" />
+                <textarea id="contactNote" className="edit-input contact-textarea" {...register("note")} />
               </div>
 
               <div className="contact-form_footer">
                 <label className="contact-checkbox">
-                  <input type="checkbox" name="isMain" checked={contactForm.isMain} onChange={handleContactInputChange} />
+                  <input type="checkbox" {...register("isMain")} />
                   Contacto principal
                 </label>
 
                 <div className="contact-form_actions">
                   <button type="button" className="btn-cancel-contact" onClick={resetContactForm} disabled={loadingContact}>Cancelar</button>
-                  <button type="submit" className="btn-save-contact" disabled={loadingContact}>
-                    {loadingContact ? "Guardando..." : editingContactId ? "Guardar cambios" : "Crear contacto"}
-                  </button>
+                  <ActionButton type="submit" compact disabled={loadingContact}>{loadingContact ? "Guardando..." : editingContactId ? "Guardar cambios" : "Crear contacto"}</ActionButton>
                 </div>
               </div>
             </form>
@@ -319,3 +331,6 @@ export const ContactDetail = ({ clientId, isAdmin, onToast }: ContactDetailProps
     </div>
   );
 };
+
+
+

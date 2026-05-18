@@ -4,6 +4,7 @@ import { z } from "zod";
 import { X, UserPlus } from "lucide-react";
 import { SYSTEM_ROLES } from "@/domain/value-objects/SystemRole";
 import type { CreateUserRequest } from "@/domain/models/User/CreateUserRequest";
+import { ActionButton } from "@/ui/components/molecules/actionButton/ActionButton";
 import "./CreatePersonalModal.scss";
 
 const schema = z.object({
@@ -105,9 +106,9 @@ export const CreatePersonalModal = ({ onClose, onSubmit, existingEmails }: Props
 
           <div className="modal_actions">
             <button type="button" className="btn_secondary" onClick={onClose}>Cancelar</button>
-            <button type="submit" className="btn_primary" disabled={isSubmitting}>
+            <ActionButton type="submit" compact disabled={isSubmitting}>
               {isSubmitting ? "Creando..." : "Crear"}
-            </button>
+            </ActionButton>
           </div>
         </form>
       </div>

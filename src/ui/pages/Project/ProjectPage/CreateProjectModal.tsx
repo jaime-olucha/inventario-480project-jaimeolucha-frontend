@@ -7,6 +7,7 @@ import type { CreateProjectRequest } from "@/domain/models/Project/CreateProject
 import { useEffect, useState } from "react";
 import { useRepositories } from "@/infrastructure/RepositoryContext/RepositoryContext";
 import type { Client } from "@/domain/models/Client/Client";
+import { ActionButton } from "@/ui/components/molecules/actionButton/ActionButton";
 import "./CreateProjectModal.scss";
 
 const schema = z.object({
@@ -109,9 +110,9 @@ export const CreateProjectModal = ({ onClose, onSubmit }: Props) => {
 
           <div className="modal_actions">
             <button type="button" className="btn_secondary" onClick={onClose}>Cancelar</button>
-            <button type="submit" className="btn_primary" disabled={isSubmitting}>
+            <ActionButton type="submit" compact disabled={isSubmitting}>
               {isSubmitting ? "Creando..." : "Crear Proyecto"}
-            </button>
+            </ActionButton>
           </div>
         </form>
       </div>

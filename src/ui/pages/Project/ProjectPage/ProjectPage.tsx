@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+﻿import { Link } from "react-router-dom";
 import { useRepositories } from "@/infrastructure/RepositoryContext/RepositoryContext";
 import { useUserStore } from "@/infrastructure/store/user.store";
 import { FolderPlus, User as UserIcon } from "lucide-react";
@@ -6,13 +6,14 @@ import { useEffect, useRef, useState } from "react";
 import { CreateProjectModal } from "./CreateProjectModal";
 import { FiltersCard } from "@/ui/components/organisms/filtersCard/FiltersCard";
 import { usePagination } from "../../../hooks/usePagination";
-import { PaginationControls } from "../../../components/PaginationControls/PaginationControls";
+import { PaginationControls } from "../../../components/organisms/paginationControls/PaginationControls";
 import './ProjectPage.scss';
 import { ROUTES } from "@/ui/routes/routes";
 import { useFilters } from "@/ui/hooks/useFilters";
 import type { CreateProjectRequest } from "@/domain/models/Project/CreateProjectRequest";
-import { getActiveBadge } from "@/infrastructure/helpers/getActveBadge";
 import { SYSTEM_ROLES } from "@/domain/value-objects/SystemRole";
+import { StatusBadge } from "@/ui/components/molecules/statusBadge/StatusBadge";
+import { ActionButton } from "@/ui/components/molecules/actionButton/ActionButton";
 import type { UserProject } from "@/domain/models/User/UserProject";
 
 const PAGE_LIMIT = 20;
@@ -54,7 +55,7 @@ export const ProjectPage = () => {
     );
     observer.observe(btn);
     return () => observer.disconnect();
-  }, []);
+  }, [isAdmin]);
 
   const handleCreateProject = async (data: CreateProjectRequest) => {
     await projectRepo.createProject(data);
@@ -72,9 +73,9 @@ export const ProjectPage = () => {
         </div>
 
         {userStore?.role === SYSTEM_ROLES.ADMIN && (
-          <button ref={addBtnRef} className="add_record" onClick={() => setIsModalOpen(true)}>
-            <FolderPlus className="iconBtn" /> Nuevo Proyecto
-          </button>
+          <ActionButton ref={addBtnRef} compact icon={<FolderPlus size={20} />} onClick={() => setIsModalOpen(true)}>
+            Nuevo Proyecto
+          </ActionButton>
         )}
       </div>
 
@@ -105,7 +106,7 @@ export const ProjectPage = () => {
                 <div className="card-project_info">
                   <h2 className="card-project_label">
                     {project.name}
-                    <span className={`card_badge ${project.isActive ? 'badge-active' : 'badge-inactive'}`}>{getActiveBadge(project.isActive)}</span>
+                    <StatusBadge isActive={project.isActive} />
                   </h2>
                   <p className="project_description info">{project.description}</p>
                   <p className="info info-client">Cliente:</p>
@@ -121,10 +122,11 @@ export const ProjectPage = () => {
       <PaginationControls page={page} isFirst={isFirst} isLast={isLast} onPrev={goPrev} onNext={goNext} />
 
       {showFab && (
-        <button className="add_record add_record--fab" onClick={() => setIsModalOpen(true)}>
-          <FolderPlus className="iconBtn" />
-        </button>
+        <ActionButton className="action-button--fab" icon={<FolderPlus size={20} />} onClick={() => setIsModalOpen(true)}>
+          <span className="sr-only">Nuevo Proyecto</span>
+        </ActionButton>
       )}
     </section>
   );
 };
+

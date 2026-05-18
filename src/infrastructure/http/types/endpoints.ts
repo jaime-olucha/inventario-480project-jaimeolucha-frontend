@@ -22,6 +22,7 @@ export const API_ENDPOINTS = {
     LIST: `/clients`,
     CREATE: `/clients`,
     BY_ID: (id: EntityId) => `/clients/${id}`,
+    BY_ID_STATUS: (id: EntityId) => `/clients/${id}/change-status`,
     PROJECTS: (id: EntityId) => `/clients/${id}/projects`,
     CONTACTS: (id: EntityId) => `/clients/${id}/contacts`,
     CONTACT_ID: (id: EntityId, contact_id: EntityId) => `/clients/${id}/contacts/${contact_id}`,
@@ -42,10 +43,17 @@ export const API_ENDPOINTS = {
     LIST: `/projects`,
     CREATE: `/projects`,
     BY_ID: (id: EntityId) => `/projects/${id}`,
+    BY_ID_STATUS: (id: EntityId) => `/projects/${id}/change-status`,
     USERS: (id: EntityId) => `/projects/${id}/users`,
+    USER: (projectId: EntityId, userId: EntityId) => `/projects/${projectId}/users/${userId}`,
     DEVELOPMENTS: (id: EntityId) => `/projects/${id}/developments`,
+    DEVELOPMENT_BY_ID: (projectId: EntityId, devId: EntityId) => `/projects/${projectId}/developments/${devId}`,
     TIME_ENTRIES: (id: EntityId) => `/projects/${id}/time-entries`,
     TIME_ENTRY_BY_ID: (projectId: EntityId, entryId: EntityId) => `/projects/${projectId}/time-entries/${entryId}`,
+  },
+
+  PROJECT_ROLES: {
+    LIST: `/project-roles`,
   },
 
 } as const;

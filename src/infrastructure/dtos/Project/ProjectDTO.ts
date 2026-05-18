@@ -1,4 +1,4 @@
-import type { EntityId } from "../../../domain/value-objects/EntityId";
+import type { EntityId } from "@/domain/value-objects/EntityId";
 
 export interface ProjectDTO {
   id: EntityId;

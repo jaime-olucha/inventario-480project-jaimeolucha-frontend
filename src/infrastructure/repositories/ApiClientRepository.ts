@@ -52,7 +52,7 @@ export class ApiClientRepository implements ClientRepository {
   async patchActive(id: EntityId, isActive: boolean): Promise<void> {
     await httpClient<void, { is_active: boolean }>({
       method: HttpMethod.PATCH,
-      path: API_ENDPOINTS.CLIENTS.BY_ID(id),
+      path: API_ENDPOINTS.CLIENTS.BY_ID_STATUS(id),
       body: { is_active: isActive },
     });
   }

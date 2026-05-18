@@ -134,46 +134,9 @@
         font-size: 15px;
         font-weight: 600;
       }
-
-      .btn-edit {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        padding: 8px 14px;
-        background-color: var(--primary);
-        border-radius: 8px;
-        font-size: 14px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: background-color 0.2s;
-
-        &:hover {
-          background-color: var(--primary-hover);
-        }
-      }
-
       .edit-actions {
         display: flex;
         gap: 10px;
-
-        .btn-save {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          padding: 8px 18px;
-          background-color: var(--primary);
-          border-radius: 10px;
-          font-size: 15px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: background-color 0.2s, transform 0.1s;
-          border: none;
-
-          &:hover {
-            background-color: var(--primary-hover);
-          }
-        }
-
         .btn-cancel {
           display: flex;
           align-items: center;
@@ -361,27 +324,6 @@
     .contacts-panel.is-open .contacts-panel_inner {
       padding-bottom: 16px;
     }
-
-    .btn-create-contact {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      margin-bottom: 12px;
-      padding: 8px 12px;
-      background: var(--primary);
-      border: 1px solid var(--primary);
-      border-radius: 10px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background-color 0.2s, transform 0.1s;
-
-      &:hover {
-        background: var(--primary-hover);
-        transform: translateY(-1px);
-      }
-    }
-
     .empty-contacts {
       padding: 14px;
       background: white;
@@ -483,8 +425,7 @@
       gap: 8px;
     }
 
-    .btn-cancel-contact,
-    .btn-save-contact {
+    .btn-cancel-contact {
       min-height: 34px;
       padding: 8px 12px;
       border-radius: 9px;
@@ -508,17 +449,6 @@
       border: 1px solid #dbe5ee;
       color: var(--color-text-secondary);
     }
-
-    .btn-save-contact {
-      background: var(--primary);
-      border: 1px solid var(--primary);
-      color: white;
-
-      &:hover:not(:disabled) {
-        background: var(--primary-hover);
-      }
-    }
-
     .contacts-list {
       display: flex;
       flex-direction: column;
@@ -988,8 +918,7 @@
         flex-direction: column-reverse;
       }
 
-      .btn-cancel-contact,
-      .btn-save-contact {
+      .btn-cancel-contact {
         width: 100%;
       }
     }

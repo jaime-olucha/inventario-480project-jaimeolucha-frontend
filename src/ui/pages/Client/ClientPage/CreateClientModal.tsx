@@ -7,6 +7,7 @@ import { useRepositories } from "@/infrastructure/RepositoryContext/RepositoryCo
 import { FilterSelect } from "@/ui/components/molecules/filterSelect/FilterSelect";
 import { Toast } from "@/ui/components/molecules/toast/Toast";
 import { ManageSectorsModal } from "./ManageSectorsModal";
+import { ActionButton } from "@/ui/components/molecules/actionButton/ActionButton";
 import type { Sector } from "@/domain/models/Client/Sector";
 import type { CreateClientRequest } from "@/domain/models/Client/CreateClientRequest";
 import "./CreateClientModal.scss";
@@ -112,9 +113,9 @@ export const CreateClientModal = ({ onClose, onSubmit }: Props) => {
 
           <div className="modal_actions">
             <button type="button" className="btn_secondary" onClick={onClose}>Cancelar</button>
-            <button type="submit" className="btn_primary" disabled={isSubmitting}>
+            <ActionButton type="submit" compact disabled={isSubmitting}>
               {isSubmitting ? "Creando..." : "Crear cliente"}
-            </button>
+            </ActionButton>
           </div>
         </form>
       </div>

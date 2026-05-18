@@ -33,16 +33,11 @@ export async function httpClient<TResponse, TBody = undefined>(options: HttpRequ
     return response.data;
 
   } catch (error: any) {
-    const backDetail = error.response.data.detail;
-    const backMessage = error.response.data.message;
+    const backDetail = error.response?.data?.detail;
+    const backMessage = error.response?.data?.message;
 
-    if (backDetail) {
-      throw new Error(backDetail)
-    }
-
-    if (backMessage) {
-      throw new Error(backMessage)
-    }
+    if (backDetail) throw new Error(backDetail);
+    if (backMessage) throw new Error(backMessage);
 
     const status = error.response?.status;
     const message = error.response?.data ?? error.message ?? "Unknown error";
