@@ -12,7 +12,7 @@ import '@/ui/components/molecules/confirmModal/ConfirmModal.scss';
 import { getErrorMessage } from "@/infrastructure/helpers/getErrorMessage";
 import type { ProjectDetail } from "@/domain/models/Project/ProjectDetail";
 import { ProjectInfo } from "@/ui/components/organisms/projectInfo/ProjectInfo";
-import { ProjecTeam } from "@/ui/components/organisms/projectTeam/ProjecTeam";
+import { ProjectTeam } from "@/ui/components/organisms/projectTeam/ProjectTeam";
 import { ProjectClients } from "@/ui/components/organisms/projectClients/ProjectClients";
 import { ProjectDevelopment } from "@/ui/components/organisms/projectDevelopments/ProjectDevelopment";
 import { ProjectHours } from "@/ui/components/organisms/projectHours/ProjectHours";
@@ -79,7 +79,7 @@ export const ProjectDetailPage = () => {
       setTimeout(() => navigate(ROUTES.USER.LIST), 1500);
     } catch (err) {
       setToast({
-        message: getErrorMessage(err),
+        message: getErrorMessage(err, "No se pudo eliminar el proyecto."),
         type: "error"
       });
       console.log(err);
@@ -150,9 +150,9 @@ export const ProjectDetailPage = () => {
 
       <div className="project-detail-page_content">
         {activeTab === 'info' && <ProjectInfo isActive={targetProject?.isActive} />}
-        {activeTab === 'equipo' && <ProjecTeam />}
+        {activeTab === 'equipo' && <ProjectTeam />}
         {activeTab === 'cliente' && <ProjectClients />}
-        {activeTab === 'desarrollo' && <ProjectDevelopment />}
+        {activeTab === 'desarrollo' && <ProjectDevelopment canEdit={canEdit} />}
         {activeTab === 'horas' && <ProjectHours />}
       </div>
 

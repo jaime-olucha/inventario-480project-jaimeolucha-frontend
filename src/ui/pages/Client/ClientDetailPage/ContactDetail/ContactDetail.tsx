@@ -140,7 +140,7 @@ export const ContactDetail = ({ clientId, isAdmin, onToast }: ContactDetailProps
       resetContactForm();
       setMainContactToReplace(null);
     } catch (err) {
-      onToast(getErrorMessage(err), "error");
+      onToast(getErrorMessage(err, "No se pudo guardar el contacto."), "error");
     } finally {
       setLoadingContact(false);
     }
@@ -163,7 +163,7 @@ export const ContactDetail = ({ clientId, isAdmin, onToast }: ContactDetailProps
       onToast("Contacto eliminado correctamente", "success");
       if (editingContactId === contactToDelete.id) resetContactForm();
     } catch (err) {
-      onToast(getErrorMessage(err), "error");
+      onToast(getErrorMessage(err, "No se pudo eliminar el contacto."), "error");
     } finally {
       setLoadingContact(false);
       setContactToDelete(null);

@@ -7,6 +7,8 @@ import type { Development } from "../models/Project/Development";
 import type { ProjectTimeEntry } from "../models/Project/ProjectTimeEntry";
 import type { CreateProjectRequest } from "../models/Project/CreateProjectRequest";
 import type { UpdateProjectRequest } from "../models/Project/UpdateProjectRequest";
+import type { CreateDevelopmentRequest } from "../models/Project/CreateDevelopmentRequest";
+import type { UpdateDevelopmentRequest } from "../models/Project/UpdateDevelopmentRequest";
 
 export interface ProjectRepository {
   getAll(page: number, limit: number): Promise<ProjectListItem[]>;
@@ -18,6 +20,9 @@ export interface ProjectRepository {
   removeUser(projectId: EntityId, userId: EntityId): Promise<void>;
   patchUserActive(projectId: EntityId, userId: EntityId, isActive: boolean): Promise<void>;
   getDevelopments(id: EntityId): Promise<Development[]>;
+  createDevelopment(projectId: EntityId, data: CreateDevelopmentRequest): Promise<void>;
+  updateDevelopment(projectId: EntityId, devId: EntityId, data: UpdateDevelopmentRequest): Promise<void>;
+  deleteDevelopment(projectId: EntityId, devId: EntityId): Promise<void>;
   getTimeEntries(id: EntityId): Promise<ProjectTimeEntry[]>;
   getTimeEntryById(projectId: EntityId, entryId: EntityId): Promise<ProjectTimeEntry>;
   updateTimeEntry(projectId: EntityId, entryId: EntityId, data: { date: string; hours: number; comment: string }): Promise<void>;

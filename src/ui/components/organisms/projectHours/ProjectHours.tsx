@@ -42,6 +42,7 @@ export const ProjectHours = () => {
   const userStore = useUserStore((store) => store.user);
 
   const [entries, setEntries] = useState<ProjectTimeEntry[]>([]);
+  const [isMember, setIsMember] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
@@ -55,6 +56,7 @@ export const ProjectHours = () => {
   const isAdmin = userStore?.role === SYSTEM_ROLES.ADMIN;
 
   const canModify = (entry: ProjectTimeEntry) => isAdmin || entry.userId === userStore?.id;
+  const canInput = isAdmin || isMember;
 
   const showToast = (message: string, type: "success" | "error" = "error") =>
     setToast({ message, type });
@@ -66,14 +68,19 @@ export const ProjectHours = () => {
   };
 
   useEffect(() => {
-    if (!id) return;
+    if (!id || !userStore) return;
     setLoading(true);
-    projectRepo
-      .getTimeEntries(id)
-      .then(setEntries)
+    Promise.all([
+      projectRepo.getTimeEntries(id),
+      projectRepo.getUsers(id),
+    ])
+      .then(([timeEntries, members]) => {
+        setEntries(timeEntries);
+        setIsMember(members.some((member) => member.userId === userStore.id && member.isActive));
+      })
       .catch(() => showToast("No se pudieron cargar las imputaciones."))
       .finally(() => setLoading(false));
-  }, [id, projectRepo]);
+  }, [id, projectRepo, userStore]);
 
   const totalHours = entries.reduce((sum, e) => sum + e.hours, 0);
 
@@ -101,7 +108,7 @@ export const ProjectHours = () => {
       closeAddForm();
       showToast("Imputación añadida correctamente.", "success");
     } catch (err) {
-      showToast(getErrorMessage(err));
+      showToast(getErrorMessage(err, "No se pudo añadir la imputación."));
     } finally {
       setSaving(false);
     }
@@ -130,7 +137,7 @@ export const ProjectHours = () => {
       closeEdit();
       showToast("Imputación actualizada correctamente.", "success");
     } catch (err) {
-      showToast(getErrorMessage(err));
+      showToast(getErrorMessage(err, "No se pudo actualizar la imputación."));
     } finally {
       setSaving(false);
     }
@@ -146,7 +153,7 @@ export const ProjectHours = () => {
       setEntryToDelete(null);
       showToast("Imputación eliminada correctamente.", "success");
     } catch (err) {
-      showToast(getErrorMessage(err));
+      showToast(getErrorMessage(err, "No se pudo eliminar la imputación."));
     } finally {
       setSaving(false);
     }
@@ -190,7 +197,7 @@ export const ProjectHours = () => {
           </div>
           <div className="header-actions">
             <span className="hours-total-badge">{totalHours}h total</span>
-            <ActionButton icon={<Plus size={16} />} onClick={openAddForm} disabled={saving || showForm}>
+            <ActionButton icon={<Plus size={16} />} onClick={openAddForm} disabled={saving || showForm || !canInput}>
               Imputar horas
             </ActionButton>
           </div>

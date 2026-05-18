@@ -10,6 +10,7 @@ import type { ProjectUserDTO } from "@/infrastructure/dtos/Project/ProjectUserDT
 import type { ProjectUser } from "../../domain/models/Project/ProjectUser";
 import type { UpdateProjectRequest } from "@/domain/models/Project/UpdateProjectRequest";
 import type { UpdateProjectRequestDTO } from "../dtos/Project/UpdateProjectRequestDTO";
+import { normalizeRoleName } from "@/domain/value-objects/ProjectRole";
 
 
 export const mapProject = (dto: ProjectDTO): Project => ({
@@ -37,7 +38,7 @@ export const mapProjectDetail = (dto: ProjectDetailDTO): ProjectDetail => ({
 
 export const mapProjectRole = (dto: ProjectRoleDTO): ProjectRole => ({
   id: dto.id,
-  name: dto.name,
+  name: normalizeRoleName(dto.name),
 })
 
 export const mapProjectUser = (dto: ProjectUserDTO): ProjectUser => ({
@@ -45,7 +46,7 @@ export const mapProjectUser = (dto: ProjectUserDTO): ProjectUser => ({
   name: dto.name,
   surname: dto.surname,
   role: mapProjectRole(dto.role),
-  isActive: dto.is_active ?? true,
+  isActive: dto.is_user_active ?? dto.is_active ?? true,
 })
 
 export const mapUpdateProject = (request: UpdateProjectRequest): UpdateProjectRequestDTO => ({

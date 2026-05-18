@@ -72,11 +72,9 @@ export const PersonalDetailPage = () => {
       setTimeout(() => navigate(ROUTES.USER.LIST), 1500);
     } catch (err) {
       setToast({
-        message: getErrorMessage(err),
+        message: getErrorMessage(err, "No se pudo eliminar el empleado."),
         type: "error"
       });
-      console.log(err);
-
     } finally {
       setLoadingPatch(false);
       setModalActive(null);
@@ -134,10 +132,9 @@ export const PersonalDetailPage = () => {
       setIsEditing(false);
     } catch (err) {
       setToast({
-        message: getErrorMessage(err),
+        message: getErrorMessage(err, "No se pudo guardar los cambios."),
         type: "error"
       });
-      console.log(err);
 
     } finally {
       setLoadingPatch(false);

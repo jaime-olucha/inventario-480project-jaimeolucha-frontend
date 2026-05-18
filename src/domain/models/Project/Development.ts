@@ -10,5 +10,5 @@ export interface Development {
   description?: string;
   technology: Technology;
   urlRepository: string
-  links: Link;
+  links: Link[];
 }

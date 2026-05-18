@@ -22,6 +22,8 @@ import type { CreateProjectRequest } from "@/domain/models/Project/CreateProject
 import type { CreateProjectRequestDTO } from "../dtos/Project/CreateProjectRequestDTO";
 import type { UpdateProjectRequest } from "@/domain/models/Project/UpdateProjectRequest";
 import type { UpdateProjectRequestDTO } from "../dtos/Project/UpdateProjectRequestDTO";
+import type { CreateDevelopmentRequest } from "@/domain/models/Project/CreateDevelopmentRequest";
+import type { UpdateDevelopmentRequest } from "@/domain/models/Project/UpdateDevelopmentRequest";
 import { v7 as uuidv7 } from "uuid";
 import { mapUpdateProject } from "../mappers/mapProject";
 
@@ -95,6 +97,41 @@ export class ApiProjectRepository implements ProjectRepository {
       path: API_ENDPOINTS.PROJECTS.DEVELOPMENTS(id),
     });
     return response.map(mapDevelopment);
+  }
+
+  async createDevelopment(projectId: EntityId, data: CreateDevelopmentRequest): Promise<void> {
+    await httpClient<void, { id: string; name: string; description?: string; technology_id: EntityId; url_repository: string }>({
+      method: HttpMethod.POST,
+      path: API_ENDPOINTS.PROJECTS.DEVELOPMENTS(projectId),
+      body: {
+        id: uuidv7(),
+        name: data.name,
+        description: data.description,
+        technology_id: data.technologyId,
+        url_repository: data.urlRepository,
+      },
+    });
+  }
+
+  async updateDevelopment(projectId: EntityId, devId: EntityId, data: UpdateDevelopmentRequest): Promise<void> {
+    await httpClient<void, { name: string; description?: string; technology_id: EntityId; url_repository: string; links: { environment: string; url: string }[] }>({
+      method: HttpMethod.PUT,
+      path: API_ENDPOINTS.PROJECTS.DEVELOPMENT_BY_ID(projectId, devId),
+      body: {
+        name: data.name,
+        description: data.description,
+        technology_id: data.technologyId,
+        url_repository: data.urlRepository,
+        links: data.links,
+      },
+    });
+  }
+
+  async deleteDevelopment(projectId: EntityId, devId: EntityId): Promise<void> {
+    await httpClient<void>({
+      method: HttpMethod.DELETE,
+      path: API_ENDPOINTS.PROJECTS.DEVELOPMENT_BY_ID(projectId, devId),
+    });
   }
 
   async getTimeEntries(id: EntityId): Promise<ProjectTimeEntry[]> {

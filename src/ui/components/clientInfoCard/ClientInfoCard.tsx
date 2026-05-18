@@ -63,7 +63,7 @@ export const ClientInfoCard = ({ clientId, isAdmin, onToast, onClientLoaded }: C
       onToast("Información actualizada correctamente", "success");
       setIsEditing(false);
     } catch (err) {
-      onToast(getErrorMessage(err), "error");
+      onToast(getErrorMessage(err, "No se pudo guardar la información del cliente."), "error");
     } finally {
       setSaving(false);
     }

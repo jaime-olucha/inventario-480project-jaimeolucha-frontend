@@ -6,7 +6,7 @@ import type { ProjectTimeEntry } from "../../domain/models/Project/ProjectTimeEn
 export const mapUserTimeEntry = (dto: UserTimeEntryDTO): UserTimeEntry => ({
   id: dto.id,
   date: dto.date,
-  hours: dto.hour,
+  hours: Number(dto.hour),
   comment: dto.comment,
   projectId: dto.project.id,
   projectName: dto.project.name
@@ -17,7 +17,7 @@ export const mapProjectTimeEntry = (dto: ProjectTimeEntryDTO): ProjectTimeEntry 
   id: dto.id,
   userId: dto.id_user,
   date: dto.date,
-  hours: dto.hour,
+  hours: Number(dto.hour),
   comment: dto.comment,
   name: dto.name,
   surname: dto.surname,

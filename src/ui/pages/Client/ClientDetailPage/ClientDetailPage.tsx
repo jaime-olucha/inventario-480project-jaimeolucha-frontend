@@ -52,7 +52,7 @@ export const ClientDetailPage = () => {
       setToast({ message: "Cliente eliminado correctamente", type: "success" });
       setTimeout(() => navigate(ROUTES.CLIENTS.LIST), 1500);
     } catch (err) {
-      setToast({ message: getErrorMessage(err), type: "error" });
+      setToast({ message: getErrorMessage(err, "No se pudo eliminar el cliente."), type: "error" });
     } finally {
       setLoadingPatch(false);
       setModalActive(null);
@@ -68,7 +68,7 @@ export const ClientDetailPage = () => {
       setTargetClient((prev) => prev ? { ...prev, isActive: nextValue } : prev);
       setToast({ message: nextValue ? "Activado correctamente" : "Inactivado correctamente", type: "success" });
     } catch (err) {
-      setToast({ message: getErrorMessage(err), type: "error" });
+      setToast({ message: getErrorMessage(err, "No se pudo cambiar el estado del cliente."), type: "error" });
     } finally {
       setLoadingPatch(false);
       setModalActive(null);

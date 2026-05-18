@@ -81,7 +81,7 @@ export const ClientPage = () => {
       setIsLast(result.length < limit);
       setToast({ message: "Cliente creado correctamente", type: "success" });
     } catch (error) {
-      setToast({ message: getErrorMessage(error), type: "error" });
+      setToast({ message: getErrorMessage(error, "No se pudo crear el cliente."), type: "error" });
     }
   };
 

@@ -8,5 +8,5 @@ export interface DevelopmentDTO {
   description?: string;
   technology: TechnologyDTO;
   url_Repository: string
-  links: LinkDTO;
+  links: LinkDTO[];
 }

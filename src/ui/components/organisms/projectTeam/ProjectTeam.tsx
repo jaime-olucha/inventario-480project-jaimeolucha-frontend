@@ -1,7 +1,7 @@
 import { useMemo, useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useParams } from "react-router-dom";
-import { Crown, KeyRound, Pencil, Search, ShieldAlert, UserPlus, Users2, X, Check, UserMinus } from "lucide-react";
+import { Crown, KeyRound, Pencil, Search, ShieldAlert, UserPlus, Users2, X, Check, UserMinus, Code2 } from "lucide-react";
 import { useRepositories } from "@/infrastructure/RepositoryContext/RepositoryContext";
 import { useUserStore } from "@/infrastructure/store/user.store";
 import { SYSTEM_ROLES } from "@/domain/value-objects/SystemRole";
@@ -16,7 +16,7 @@ import type { ProjectRole } from "@/domain/models/Project/ProjectRole";
 import type { User } from "@/domain/models/User/User";
 import type { EntityId } from "@/domain/value-objects/EntityId";
 import "@/ui/components/molecules/confirmModal/ConfirmModal.scss";
-import "./ProjecTeam.scss";
+import "./ProjectTeam.scss";
 
 type TeamFormMode = "add" | "edit";
 
@@ -40,7 +40,7 @@ function getFullName(user: ProjectUser | User): string {
   return `${user.name} ${user.surname}`.trim();
 }
 
-export const ProjecTeam = () => {
+export const ProjectTeam = () => {
   const { id } = useParams<{ id: EntityId }>();
   const { project: projectRepo, user: userRepo } = useRepositories();
   const userStore = useUserStore((store) => store.user);
@@ -53,7 +53,7 @@ export const ProjecTeam = () => {
   const [error, setError] = useState<string | null>(null);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
   const [search, setSearch] = useState("");
-  const [roleFilter, setRoleFilter] = useState("ALL");
+  const [roleFilter, setRoleFilter] = useState("");
   const [formMeta, setFormMeta] = useState<TeamFormMeta | null>(null);
   const [pendingUserChange, setPendingUserChange] = useState<PendingUserChange | null>(null);
 
@@ -110,14 +110,14 @@ export const ProjecTeam = () => {
     [activeTeam],
   );
 
+  const techLeader = useMemo(
+    () => activeTeam.find((member) => member.role.name === PROJECT_ROLES.TECH_LEADER),
+    [activeTeam],
+  );
+
   const isAdmin = userStore?.role === SYSTEM_ROLES.ADMIN;
   const isProjectManager = Boolean(projectManager && userStore?.id === projectManager.userId);
   const canEdit = isAdmin || isProjectManager;
-
-  const filterRoles = useMemo(
-    () => Array.from(new Set(activeTeam.map((member) => member.role.name))),
-    [activeTeam],
-  );
 
   const availableUsers = useMemo(() => {
     const assignedUserIds = new Set(activeTeam.map((member) => member.userId));
@@ -137,16 +137,11 @@ export const ProjecTeam = () => {
 
   const filteredTeam = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
-
     return activeTeam.filter((member) => {
-      const matchesSearch = !normalizedSearch
-        || getFullName(member).toLowerCase().includes(normalizedSearch)
-        || getProjectRoleLabel(member.role.name).toLowerCase().includes(normalizedSearch);
-      const matchesRole = roleFilter === "ALL" || member.role.name === roleFilter;
-
-      return matchesSearch && matchesRole;
+      if (roleFilter && member.role.name !== roleFilter) return false;
+      return !normalizedSearch || getFullName(member).toLowerCase().includes(normalizedSearch);
     });
-  }, [roleFilter, search, activeTeam]);
+  }, [search, roleFilter, activeTeam]);
 
   const openAddForm = () => {
     const firstUser = availableUsers[0];
@@ -193,7 +188,7 @@ export const ProjecTeam = () => {
       closeForm();
       setPendingUserChange(null);
     } catch (err) {
-      showToast(getErrorMessage(err));
+      showToast(getErrorMessage(err, "No se pudo guardar la asignación."));
     } finally {
       setSaving(false);
     }
@@ -234,7 +229,7 @@ export const ProjecTeam = () => {
       await refreshTeam();
       showToast(`${getFullName(member)} ha sido eliminado del proyecto.`, "success");
     } catch (err) {
-      showToast(getErrorMessage(err));
+      showToast(getErrorMessage(err, "No se pudo quitar al usuario del proyecto."));
     } finally {
       setSaving(false);
     }
@@ -308,25 +303,19 @@ export const ProjecTeam = () => {
         </div>
 
         <div className="role-summary">
-          <article className="summary-card summary-card--pm">
-            <div className="summary-icon">
-              <Crown size={20} />
-            </div>
-            <div>
-              <span>Project Manager</span>
-              <strong>{projectManager ? getFullName(projectManager) : "Sin asignar"}</strong>
-            </div>
-          </article>
-
-          <article className="summary-card summary-card--kam">
-            <div className="summary-icon">
-              <KeyRound size={20} />
-            </div>
-            <div>
-              <span>KAM</span>
-              <strong>{kam ? getFullName(kam) : "Sin asignar"}</strong>
-            </div>
-          </article>
+          {([
+            { label: "Project Manager", member: projectManager, icon: <Crown size={20} />, cls: "summary-card--pm" },
+            { label: "KAM", member: kam, icon: <KeyRound size={20} />, cls: "summary-card--kam" },
+            { label: "Tech Leader", member: techLeader, icon: <Code2 size={20} />, cls: "summary-card--tech" },
+          ]).map(({ label, member, icon, cls }) => (
+            <article key={label} className={`summary-card ${cls}`}>
+              <div className="summary-icon">{icon}</div>
+              <div className="summary-info">
+                <span>{label}</span>
+                <strong>{member ? getFullName(member) : "Sin asignar"}</strong>
+              </div>
+            </article>
+          ))}
 
           <article className="summary-card">
             <div className="summary-icon">
@@ -388,13 +377,12 @@ export const ProjecTeam = () => {
         <div className="team-toolbar">
           <div className="search-box">
             <Search size={17} />
-            <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar por nombre o rol..." type="search" />
+            <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar por nombre..." type="search" />
           </div>
-
           <select value={roleFilter} onChange={(event) => setRoleFilter(event.target.value)}>
-            <option value="ALL">Todos los roles</option>
-            {filterRoles.map((role) => (
-              <option key={role} value={role}>{getProjectRoleLabel(role)}</option>
+            <option value="">Todos los roles</option>
+            {projectRoles.map((role) => (
+              <option key={role.id} value={role.name}>{getProjectRoleLabel(role.name)}</option>
             ))}
           </select>
         </div>
@@ -410,6 +398,7 @@ export const ProjecTeam = () => {
             {filteredTeam.map((member) => {
               const isPm = member.role.name === PROJECT_ROLES.PROJECT_MANAGER;
               const isKam = member.role.name === PROJECT_ROLES.KAM;
+              const isTechLead = member.role.name === PROJECT_ROLES.TECH_LEADER;
 
               return (
                 <article className="team-member" key={`${member.userId}-${member.role.id}`}>
@@ -421,7 +410,7 @@ export const ProjecTeam = () => {
                   </div>
 
                   <div className="member-side">
-                    <span className={`role-badge ${isPm ? "role-badge--pm" : ""} ${isKam ? "role-badge--kam" : ""}`}>
+                    <span className={`role-badge ${isPm ? "role-badge--pm" : ""} ${isKam ? "role-badge--kam" : ""} ${isTechLead ? "role-badge--tech" : ""}`}>
                       {getProjectRoleLabel(member.role.name)}
                     </span>
 
@@ -446,7 +435,7 @@ export const ProjecTeam = () => {
           <div className="empty-state empty-state--compact">
             <Search size={30} />
             <h3>No hay coincidencias</h3>
-            <p>Prueba con otro nombre o cambia el filtro de rol.</p>
+            <p>Prueba con otro nombre.</p>
           </div>
         )}
 

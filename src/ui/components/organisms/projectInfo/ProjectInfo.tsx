@@ -10,6 +10,8 @@ import type { Client } from "@/domain/models/Client/Client";
 import type { EntityId } from "@/domain/value-objects/EntityId";
 import { StatusBadge } from "@/ui/components/molecules/statusBadge/StatusBadge";
 import { ActionButton } from "@/ui/components/molecules/actionButton/ActionButton";
+import { Toast } from "@/ui/components/molecules/toast/Toast";
+import { getErrorMessage } from "@/infrastructure/helpers/getErrorMessage";
 import "./ProjectInfo.scss";
 import type { UpdateProjectRequest } from "@/domain/models/Project/UpdateProjectRequest";
 
@@ -39,7 +41,7 @@ export const ProjectInfo = ({ isActive: isActiveProp }: ProjectInfoProps) => {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [saveError, setSaveError] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<EditForm>();
 
@@ -69,19 +71,16 @@ export const ProjectInfo = ({ isActive: isActiveProp }: ProjectInfoProps) => {
       startDate: toInputDate(project.startDate),
       clientId: project.clientId,
     });
-    setSaveError(null);
     setEditing(true);
   };
 
   const cancelEdit = () => {
     setEditing(false);
-    setSaveError(null);
   };
 
   const onSubmit = async (data: EditForm) => {
     if (!id || !project) return;
     setSaving(true);
-    setSaveError(null);
     try {
       await projectRepo.putUser(id, {
         name: data.name,
@@ -90,7 +89,8 @@ export const ProjectInfo = ({ isActive: isActiveProp }: ProjectInfoProps) => {
         isActive: project.isActive,
         clientId: data.clientId,
       });
-      const selectedClient = clients.find(c => c.id === data.clientId);
+
+      const selectedClient = clients.find(client => client.id === data.clientId);
       setProject(prev => prev ? {
         ...prev,
         name: data.name,
@@ -99,9 +99,11 @@ export const ProjectInfo = ({ isActive: isActiveProp }: ProjectInfoProps) => {
         clientId: data.clientId,
         clientName: selectedClient?.name ?? prev.clientName,
       } : prev);
+
       setEditing(false);
-    } catch (err: any) {
-      setSaveError(err.message ?? "No se pudo guardar. Inténtalo de nuevo.");
+      setToast({ message: "Proyecto actualizado correctamente.", type: "success" });
+    } catch (err) {
+      setToast({ message: getErrorMessage(err, "No se pudo guardar el proyecto."), type: "error" });
     } finally {
       setSaving(false);
     }
@@ -134,6 +136,9 @@ export const ProjectInfo = ({ isActive: isActiveProp }: ProjectInfoProps) => {
 
   return (
     <div className="project-info">
+      {toast && (
+        <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
+      )}
       <div className="card">
         <div className="card-header">
           <div>
@@ -220,8 +225,8 @@ export const ProjectInfo = ({ isActive: isActiveProp }: ProjectInfoProps) => {
                       {...register("clientId", { required: "El cliente es obligatorio" })}
                     >
                       <option value="">Selecciona un cliente</option>
-                      {clients.map(c => (
-                        <option key={c.id} value={c.id}>{c.name}</option>
+                      {clients.map(client => (
+                        <option key={client.id} value={client.id}>{client.name}</option>
                       ))}
                     </select>
                     {errors.clientId && <span className="field-error">{errors.clientId.message}</span>}
@@ -235,7 +240,6 @@ export const ProjectInfo = ({ isActive: isActiveProp }: ProjectInfoProps) => {
               </div>
             </div>
 
-            {saveError && <p className="save-error">{saveError}</p>}
           </form>
         )}
       </div>
