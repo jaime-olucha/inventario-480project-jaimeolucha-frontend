@@ -21,6 +21,6 @@ export const mapDevelopment = (dto: DevelopmentDTO): Development => ({
   name: dto.name,
   description: dto.description,
   technology: mapTechnology(dto.technology),
-  urlRepository: dto.url_Repository,
+  urlRepository: dto.url_repository,
   links: dto.links.map(mapLink),
 })

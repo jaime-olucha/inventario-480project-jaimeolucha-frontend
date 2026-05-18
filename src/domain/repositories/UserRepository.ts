@@ -15,6 +15,6 @@ export interface UserRepository {
   createUser(data: CreateUserRequest): Promise<void>;
   patchActive(id: EntityId, isActive: boolean): Promise<void>;
   deleteUser(id: EntityId): Promise<void>;
-  putUser(id: EntityId, data: UpdateUserRequest): Promise<void>
-
+  putUser(id: EntityId, data: UpdateUserRequest): Promise<void>;
+  putPassword(id: EntityId): Promise<void>;
 }

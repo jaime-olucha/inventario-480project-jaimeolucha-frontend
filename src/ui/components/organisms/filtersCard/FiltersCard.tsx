@@ -47,9 +47,16 @@ export const FiltersCard = ({
   useEffect(() => {
     if (!cardRef.current) return;
     const parent = getScrollParent(cardRef.current);
-    const handleScroll = () => setScrolled(parent.scrollTop > 80);
-    parent.addEventListener('scroll', handleScroll);
-    return () => parent.removeEventListener('scroll', handleScroll);
+    let raf: number;
+    const handleScroll = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => setScrolled(parent.scrollTop > 80));
+    };
+    parent.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      parent.removeEventListener('scroll', handleScroll);
+      cancelAnimationFrame(raf);
+    };
   }, []);
 
   return (

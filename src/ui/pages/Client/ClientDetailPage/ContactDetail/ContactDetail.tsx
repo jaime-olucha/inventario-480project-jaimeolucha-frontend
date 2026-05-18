@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { ChevronDown, Edit2, Mail, Phone, StickyNote, Trash2, UserPlus, Users } from "lucide-react";
+import { MenuOptions } from "@/ui/components/menuOptions/MenuOptions";
 import { getErrorMessage } from "@/infrastructure/helpers/getErrorMessage";
 import { useRepositories } from "@/infrastructure/RepositoryContext/RepositoryContext";
 import type { Contact } from "@/domain/models/Client/Contact";
@@ -312,14 +313,22 @@ export const ContactDetail = ({ clientId, isAdmin, onToast }: ContactDetailProps
                     </div>
 
                     {isAdmin && (
-                      <>
-                        <button className="btn-contact-action btn-contact-edit" onClick={() => handleEditContactClick(contact)} aria-label="Editar contacto" disabled={loadingContact}>
-                          <Edit2 size={15} />
-                        </button>
-                        <button className="btn-contact-action btn-contact-delete" onClick={() => setContactToDelete(contact)} aria-label="Borrar contacto" disabled={loadingContact}>
-                          <Trash2 size={15} />
-                        </button>
-                      </>
+                      <MenuOptions
+                        disabled={loadingContact}
+                        items={[
+                          {
+                            label: "Editar",
+                            icon: <Edit2 size={14} />,
+                            onClick: () => handleEditContactClick(contact),
+                          },
+                          {
+                            label: "Eliminar",
+                            icon: <Trash2 size={14} />,
+                            variant: "danger",
+                            onClick: () => setContactToDelete(contact),
+                          },
+                        ]}
+                      />
                     )}
                   </div>
                 </li>
