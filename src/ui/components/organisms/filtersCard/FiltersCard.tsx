@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { ListFilter, Search } from "lucide-react";
-import { FilterSelect } from "@/ui/components/molecules/filterSelect/FilterSelect";
+import { FilterSelect } from "@/ui/components/organisms/filterSelect/FilterSelect";
 import { STATUS_OPTIONS } from "@/ui/hooks/useFilters";
 import "./FiltersCard.scss";
 

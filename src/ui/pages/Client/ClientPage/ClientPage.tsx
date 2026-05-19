@@ -4,11 +4,11 @@ import { useUserStore } from "@/infrastructure/store/user.store";
 import { Building2, Plus } from "lucide-react";
 import { ProjectsCounter } from "@/ui/components/molecules/projectsCounter/ProjectsCounter";
 import { useEffect, useRef, useState } from "react";
-import { FilterSelect } from "@/ui/components/molecules/filterSelect/FilterSelect";
+import { FilterSelect } from "@/ui/components/organisms/filterSelect/FilterSelect";
 import type { Sector } from "@/domain/models/Client/Sector";
 import { FiltersCard } from "@/ui/components/organisms/filtersCard/FiltersCard";
 import { usePagination } from "../../../hooks/usePagination";
-import { PaginationControls } from "../../../components/organisms/paginationControls/PaginationControls";
+import { PaginationControls } from "../../../components/molecules/paginationControls/PaginationControls";
 import './ClientPage.scss';
 import { ROUTES } from "@/ui/routes/routes";
 import type { Client } from "@/domain/models/Client/Client";
@@ -17,8 +17,8 @@ import type { CreateClientRequest } from "@/domain/models/Client/CreateClientReq
 import { CreateClientModal } from "./CreateClientModal";
 import { Toast } from "@/ui/components/molecules/toast/Toast";
 import { getErrorMessage } from "@/infrastructure/helpers/getErrorMessage";
-import { StatusBadge } from "@/ui/components/molecules/statusBadge/StatusBadge";
-import { ActionButton } from "@/ui/components/molecules/actionButton/ActionButton";
+import { StatusBadge } from "@/ui/components/atoms/statusBadge/StatusBadge";
+import { ActionButton } from "@/ui/components/atoms/actionButton/ActionButton";
 
 const PAGE_LIMIT = 20;
 

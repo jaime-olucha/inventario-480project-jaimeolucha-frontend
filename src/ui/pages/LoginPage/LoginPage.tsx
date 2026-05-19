@@ -1,9 +1,11 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 import { useAuthStore } from '../../../infrastructure/store/auth.store'
 import type { LoginFormData } from "./loginSchema";
 import { loginSchema } from "./loginSchema";
 import { useRepositories } from "../../../infrastructure/RepositoryContext/RepositoryContext";
+import { Toast } from "../../components/molecules/toast/Toast";
 import logoWhite from "../../assets/logo-480/480dev_white.webp";
 import './LoginPage.scss';
 
@@ -11,6 +13,11 @@ import './LoginPage.scss';
 export const LoginPage = () => {
   const setTokens = useAuthStore((state) => state.setTokens);
   const { auth } = useRepositories();
+  const [sessionMessage] = useState(() => {
+    const msg = sessionStorage.getItem('sessionMessage');
+    sessionStorage.removeItem('sessionMessage');
+    return msg;
+  });
 
   const { register, handleSubmit, formState: { errors, isSubmitting }
   } = useForm<LoginFormData>({
@@ -36,6 +43,10 @@ export const LoginPage = () => {
         <h1>Gestión de Proyectos</h1>
         <p>Ingresa con tu correo corporativo</p>
       </div>
+
+      {sessionMessage && (
+        <Toast message={sessionMessage} type="success" onClose={() => { }} />
+      )}
 
       <form className="login-page_form" onSubmit={handleSubmit(onSubmit)}>
         <div>

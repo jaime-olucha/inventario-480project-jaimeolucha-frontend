@@ -4,7 +4,7 @@ import { X, Plus, Edit2, Trash2, Save, ListTree, Loader2, AlertCircle } from "lu
 import { useRepositories } from "@/infrastructure/RepositoryContext/RepositoryContext";
 import { getErrorMessage } from "@/infrastructure/helpers/getErrorMessage";
 import { Toast } from "@/ui/components/molecules/toast/Toast";
-import { ConfirmModal } from "@/ui/components/molecules/confirmModal/ConfirmModal";
+import { ConfirmModal } from "@/ui/components/organisms/confirmModal/ConfirmModal";
 import type { Sector } from "@/domain/models/Client/Sector";
 import type { EntityId } from "@/domain/value-objects/EntityId";
 import "./ManageSectorsModal.scss";

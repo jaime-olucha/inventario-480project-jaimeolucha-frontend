@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Building2, Edit2, FolderKanban, ListTree, Save, X } from "lucide-react";
 import { useRepositories } from "@/infrastructure/RepositoryContext/RepositoryContext";
-import { ActionButton } from "@/ui/components/molecules/actionButton/ActionButton";
+import { ActionButton } from "@/ui/components/atoms/actionButton/ActionButton";
 import { ManageSectorsModal } from "@/ui/pages/Client/ClientPage/ManageSectorsModal";
 import { ContactDetail } from "@/ui/pages/Client/ClientDetailPage/ContactDetail/ContactDetail";
 import { getErrorMessage } from "@/infrastructure/helpers/getErrorMessage";

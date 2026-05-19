@@ -4,7 +4,7 @@ import { z } from "zod";
 import { X, UserPlus } from "lucide-react";
 import { SYSTEM_ROLES } from "@/domain/value-objects/SystemRole";
 import type { CreateUserRequest } from "@/domain/models/User/CreateUserRequest";
-import { ActionButton } from "@/ui/components/molecules/actionButton/ActionButton";
+import { ActionButton } from "@/ui/components/atoms/actionButton/ActionButton";
 import "./CreatePersonalModal.scss";
 
 const schema = z.object({

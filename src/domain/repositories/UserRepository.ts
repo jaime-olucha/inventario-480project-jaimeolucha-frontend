@@ -5,6 +5,7 @@ import type { UpdateUserRequest } from "../models/User/UpdateUserRequest";
 import type { UserProject } from "../models/User/UserProject";
 import type { UserTimeEntry } from "../models/User/UserTimeEntry";
 import type { CreateTimeEntryRequest } from "../models/User/CreateTimeEntryRequest";
+import type { ChangePassword } from "../models/User/ChangePassword";
 
 export interface UserRepository {
   getAll(page: number, limit: number): Promise<User[]>;
@@ -16,5 +17,6 @@ export interface UserRepository {
   patchActive(id: EntityId, isActive: boolean): Promise<void>;
   deleteUser(id: EntityId): Promise<void>;
   putUser(id: EntityId, data: UpdateUserRequest): Promise<void>;
-  putPassword(id: EntityId): Promise<void>;
+  patchPassword(id: EntityId, data: ChangePassword): Promise<void>;
+  patchAdminPassword(id: EntityId, newPassword: string): Promise<void>;
 }

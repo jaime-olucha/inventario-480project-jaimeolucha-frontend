@@ -3,7 +3,7 @@ import { useAuthStore } from "../../infrastructure/store/auth.store";
 import { AppLayout } from "../layouts/AppLayout";
 import { ROUTES } from "./routes";
 import { ProtectedRoute } from "./ProtectedRoute";
-import { SIDEBAR_ITEMS } from "../components/sidebar/sidebarConfig";
+import { SIDEBAR_ITEMS } from "../components/organisms/sidebar/sidebarConfig";
 import { LoginPage } from "../pages/LoginPage/LoginPage";
 import { ProjectDetailPage } from "../pages/Project/ProjectDetailPage/ProjectDetailPage";
 import { ClientDetailPage } from "../pages/Client/ClientDetailPage/ClientDetailPage";

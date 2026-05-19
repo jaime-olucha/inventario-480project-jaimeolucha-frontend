@@ -8,13 +8,13 @@ import { useRepositories } from "@/infrastructure/RepositoryContext/RepositoryCo
 import { useUserStore } from "@/infrastructure/store/user.store";
 import { SYSTEM_ROLES } from "@/domain/value-objects/SystemRole";
 import { getErrorMessage } from "@/infrastructure/helpers/getErrorMessage";
-import { ConfirmModal } from "@/ui/components/molecules/confirmModal/ConfirmModal";
-import { ActionButton } from "@/ui/components/molecules/actionButton/ActionButton";
+import { ConfirmModal } from "@/ui/components/organisms/confirmModal/ConfirmModal";
+import { ActionButton } from "@/ui/components/atoms/actionButton/ActionButton";
 import { Toast } from "@/ui/components/molecules/toast/Toast";
-import { MenuOptions } from "@/ui/components/menuOptions/MenuOptions";
+import { MenuOptions } from "@/ui/components/organisms/menuOptions/MenuOptions";
 import type { ProjectTimeEntry } from "@/domain/models/Project/ProjectTimeEntry";
 import type { EntityId } from "@/domain/value-objects/EntityId";
-import "@/ui/components/molecules/confirmModal/ConfirmModal.scss";
+import "@/ui/components/organisms/confirmModal/ConfirmModal.scss";
 import "./ProjectHours.scss";
 
 const today = new Date().toISOString().split("T")[0];

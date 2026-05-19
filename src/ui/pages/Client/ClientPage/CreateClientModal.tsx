@@ -4,10 +4,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { X, Building2, ListTree } from "lucide-react";
 import { useRepositories } from "@/infrastructure/RepositoryContext/RepositoryContext";
-import { FilterSelect } from "@/ui/components/molecules/filterSelect/FilterSelect";
+import { FilterSelect } from "@/ui/components/organisms/filterSelect/FilterSelect";
 import { Toast } from "@/ui/components/molecules/toast/Toast";
 import { ManageSectorsModal } from "./ManageSectorsModal";
-import { ActionButton } from "@/ui/components/molecules/actionButton/ActionButton";
+import { ActionButton } from "@/ui/components/atoms/actionButton/ActionButton";
 import type { Sector } from "@/domain/models/Client/Sector";
 import type { CreateClientRequest } from "@/domain/models/Client/CreateClientRequest";
 import "./CreateClientModal.scss";
@@ -69,9 +69,9 @@ export const CreateClientModal = ({ onClose, onSubmit }: Props) => {
         </div>
 
         {isManageSectorsOpen && (
-          <ManageSectorsModal 
-            onClose={() => setIsManageSectorsOpen(false)} 
-            onSectorsChanged={fetchSectors} 
+          <ManageSectorsModal
+            onClose={() => setIsManageSectorsOpen(false)}
+            onSectorsChanged={fetchSectors}
             onSuccess={(msg) => setToast({ message: msg, type: "success" })}
           />
         )}
