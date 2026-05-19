@@ -1,38 +1,15 @@
-import { useState } from "react";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { LogOut, PanelLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
-
 import logoFull from "@/ui/assets/logo-480/480dev_white.webp";
 import logoIcon from "@/ui/assets/logo-480/480_white.webp";
 import { SIDEBAR_ITEMS } from "./sidebarConfig";
-import { useUserStore } from "@/infrastructure/store/user.store";
-import { useAuthStore } from "@/infrastructure/store/auth.store";
-import { useRepositories } from "@/infrastructure/RepositoryContext/RepositoryContext";
 import { ROUTES } from "@/ui/routes/routes";
-import { getRoleBadge } from "@/infrastructure/helpers/getRoleBadge";
 import { LogoUser } from "@/ui/components/atoms/logoUser/LogoUser";
+import { useSidebar } from "./useSidebar";
 
 export function Sidebar() {
-  const [expanded, setExpanded] = useState(true);
-
-  const user = useUserStore((store) => store.user);
-  const clearUser = useUserStore((store) => store.clearUser);
-  const authLogout = useAuthStore((store) => store.logout);
-  const navigate = useNavigate();
-  const { auth } = useRepositories();
-
-  const roleBadge = getRoleBadge(user?.role);
-
-  async function handleLogout() {
-    try {
-      await auth.logout();
-    } finally {
-      authLogout();
-      clearUser();
-      navigate("/login");
-    }
-  }
+  const { expanded, roleBadge, user, handleLogout, handleToggleExpanded } = useSidebar();
 
   return (
     <aside className={cn(
@@ -41,7 +18,7 @@ export function Sidebar() {
       expanded ? "w-64" : "w-16"
     )}>
       <button
-        onClick={() => setExpanded((v) => !v)}
+        onClick={handleToggleExpanded}
         className="absolute -right-9 top-4 z-10 p-2 text-gray-500 hover:text-gray-700 transition-colors"
       >
         <PanelLeft className="h-5 w-5 transition-transform duration-200" />
@@ -55,14 +32,14 @@ export function Sidebar() {
       </div>
 
       <Link
-        to={ROUTES.USER.BY_ID(user?.id)}
+        to={user ? ROUTES.USER.BY_ID(user.id) : '#'}
         className={cn(
           "flex items-center gap-3 py-3 mx-2 my-2 rounded-xl border-sidebar-border transition-colors bg-gray-50 hover:bg-gray-200",
           expanded ? "px-3" : "justify-center px-0 bg-transparent"
         )}
       >
         <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center font-bold text-black">
-          <LogoUser user={user} />
+          <LogoUser user={user ?? undefined} />
         </div>
         {expanded && (
           <div className="flex flex-col min-w-0">

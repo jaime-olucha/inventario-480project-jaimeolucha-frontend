@@ -17,5 +17,6 @@ export const ROUTES = {
   USER: {
     LIST: "/user",
     BY_ID: (id: EntityId) => `/user/${id}`,
+    ME: () => `/me`,
   }
 } as const;

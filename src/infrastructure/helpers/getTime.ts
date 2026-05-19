@@ -54,3 +54,5 @@ export const getWeeklyHours = (timeEntries: UserTimeEntry[]): WeekDay[] => {
 
   return week;
 };
+
+export const today = new Date().toISOString().split("T")[0];

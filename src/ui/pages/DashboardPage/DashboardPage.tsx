@@ -7,26 +7,27 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import type { UserProject } from "@/domain/models/User/UserProject";
 import type { UserTimeEntry } from "@/domain/models/User/UserTimeEntry";
-import { getWeeklyHours } from "@/infrastructure/helpers/getWeeklyHours";
+import { getWeeklyHours } from "@/infrastructure/helpers/getTime";
 import { getRoleBadge } from "@/infrastructure/helpers/getRoleBadge";
 import { ROUTES } from "@/ui/routes/routes";
 import { CalendarDays, Clock, Mail, Plus, SquareArrowRightEnter, User } from 'lucide-react';
 import './DashboardPage.scss';
 import { LogoUser } from "@/ui/components/atoms/logoUser/LogoUser";
+import { today } from "@/infrastructure/helpers/getTime";
 
-const today = new Date().toISOString().split("T")[0];
-const PROJECT_COLORS = ["#00b341", "#3b82f6", "#f59e0b", "#8b5cf6", "#ec4899", "#06b6d4", "#f97316", "#14b8a6"];
 
-const timeEntrySchema = z.object({
-  projectId: z.string().min(1, "Selecciona un proyecto"),
-  date: z.string().min(1, "La fecha es obligatoria"),
-  hours: z.string().refine((value) => Number(value) > 0, { message: "Introduce un número de horas válido" }),
-  comment: z.string().optional(),
-});
 
-type TimeEntryForm = z.infer<typeof timeEntrySchema>;
 
 export const DashboardPage = () => {
+  const PROJECT_COLORS = ["#00b341", "#3b82f6", "#f59e0b", "#8b5cf6", "#ec4899", "#06b6d4", "#f97316", "#14b8a6"];
+  const timeEntrySchema = z.object({
+    projectId: z.string().min(1, "Selecciona un proyecto"),
+    date: z.string().min(1, "La fecha es obligatoria"),
+    hours: z.string().refine((value) => Number(value) > 0, { message: "Introduce un número de horas válido" }),
+    comment: z.string().optional(),
+  });
+  type TimeEntryForm = z.infer<typeof timeEntrySchema>;
+
   const userStore = useUserStore((store) => store.user);
   const { user: userRepo } = useRepositories();
   const [projects, setProjects] = useState<UserProject[]>([]);
