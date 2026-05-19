@@ -6,17 +6,17 @@ import { useRepositories } from "@/infrastructure/RepositoryContext/RepositoryCo
 import { useUserStore } from "@/infrastructure/store/user.store";
 import { SYSTEM_ROLES } from "@/domain/value-objects/SystemRole";
 import { PROJECT_ROLES, getProjectRoleLabel } from "@/domain/value-objects/ProjectRole";
-import { ConfirmModal } from "@/ui/components/molecules/confirmModal/ConfirmModal";
-import { ActionButton } from "@/ui/components/molecules/actionButton/ActionButton";
-import { LogoUser } from "@/ui/components/logoUser/LogoUser";
+import { ConfirmModal } from "@/ui/components/organisms/confirmModal/ConfirmModal";
+import { ActionButton } from "@/ui/components/atoms/actionButton/ActionButton";
+import { LogoUser } from "@/ui/components/atoms/logoUser/LogoUser";
 import { Toast } from "@/ui/components/molecules/toast/Toast";
-import { MenuOptions } from "@/ui/components/menuOptions/MenuOptions";
+import { MenuOptions } from "@/ui/components/organisms/menuOptions/MenuOptions";
 import { getErrorMessage } from "@/infrastructure/helpers/getErrorMessage";
 import type { ProjectUser } from "@/domain/models/Project/ProjectUser";
 import type { ProjectRole } from "@/domain/models/Project/ProjectRole";
 import type { User } from "@/domain/models/User/User";
 import type { EntityId } from "@/domain/value-objects/EntityId";
-import "@/ui/components/molecules/confirmModal/ConfirmModal.scss";
+import "@/ui/components/organisms/confirmModal/ConfirmModal.scss";
 import "./ProjectTeam.scss";
 
 type TeamFormMode = "add" | "edit";

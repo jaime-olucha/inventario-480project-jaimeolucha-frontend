@@ -1,14 +1,14 @@
-import ProjectMenuBar, { type ProjectTab } from "@/ui/components/menuItem/ProjectMenuItem";
+import ProjectMenuBar, { type ProjectTab } from "@/ui/components/organisms/menuItem/ProjectMenuItem";
 import { useNavigate, useParams } from "react-router-dom";
 import { useRepositories } from "@/infrastructure/RepositoryContext/RepositoryContext";
 import { useCallback, useEffect, useState } from "react";
 import { ROUTES } from "@/ui/routes/routes";
 import type { EntityId } from "@/domain/value-objects/EntityId";
 import { ArrowLeft, FolderX, Trash2, UserCheck } from "lucide-react";
-import { ConfirmModal } from "@/ui/components/molecules/confirmModal/ConfirmModal";
+import { ConfirmModal } from "@/ui/components/organisms/confirmModal/ConfirmModal";
 import { Toast } from "@/ui/components/molecules/toast/Toast";
 import './ProjectDetailPage.scss';
-import '@/ui/components/molecules/confirmModal/ConfirmModal.scss';
+import '@/ui/components/organisms/confirmModal/ConfirmModal.scss';
 import { getErrorMessage } from "@/infrastructure/helpers/getErrorMessage";
 import type { ProjectDetail } from "@/domain/models/Project/ProjectDetail";
 import { ProjectInfo } from "@/ui/components/organisms/projectInfo/ProjectInfo";

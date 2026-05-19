@@ -23,8 +23,10 @@ export const useAuthInit = () => {
 
       user.getById(decode.id).then((u) => {
         setUser(u);
+
       }).catch(() => {
         logout();
+
       }).finally(() => {
         setInitialized();
       })

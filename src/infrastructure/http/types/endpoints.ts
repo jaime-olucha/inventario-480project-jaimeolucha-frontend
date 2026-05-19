@@ -13,8 +13,8 @@ export const API_ENDPOINTS = {
     CREATE: `/users`,
     BY_ID: (id: EntityId) => `/users/${id}`,
     PROJECTS: (id: EntityId) => `/users/${id}/projects`,
-    PASSWORD_CHANGE: (id: EntityId) => `/users/${id}/password_change`,
-    ADMIN_PASSWORD_CHANGE: (id: EntityId) => `/users/${id}/admin_password`,
+    PASSWORD_CHANGE: (id: EntityId) => `/users/${id}/password-change`,
+    ADMIN_PASSWORD_CHANGE: (id: EntityId) => `/users/${id}/admin-password`,
     TIME_ENTRIES: (id: EntityId) => `/users/${id}/time-entries`,
   },
 

@@ -4,10 +4,10 @@ import { AlertCircle, Edit2, Loader2, Plus, Save, Settings, Trash2, X } from "lu
 import { useRepositories } from "@/infrastructure/RepositoryContext/RepositoryContext";
 import { getErrorMessage } from "@/infrastructure/helpers/getErrorMessage";
 import { Toast } from "@/ui/components/molecules/toast/Toast";
-import { ConfirmModal } from "@/ui/components/molecules/confirmModal/ConfirmModal";
+import { ConfirmModal } from "@/ui/components/organisms/confirmModal/ConfirmModal";
 import type { Technology } from "@/domain/models/Project/Technology";
 import type { EntityId } from "@/domain/value-objects/EntityId";
-import "@/ui/components/molecules/confirmModal/ConfirmModal.scss";
+import "@/ui/components/organisms/confirmModal/ConfirmModal.scss";
 import "./ManageTechnologiesModal.scss";
 
 interface ManageTechnologiesModalProps {

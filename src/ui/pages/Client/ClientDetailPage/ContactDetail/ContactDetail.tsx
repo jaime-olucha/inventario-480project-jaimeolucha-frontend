@@ -3,14 +3,14 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { ChevronDown, Edit2, Mail, Phone, StickyNote, Trash2, UserPlus, Users } from "lucide-react";
-import { MenuOptions } from "@/ui/components/menuOptions/MenuOptions";
+import { MenuOptions } from "@/ui/components/organisms/menuOptions/MenuOptions";
 import { getErrorMessage } from "@/infrastructure/helpers/getErrorMessage";
 import { useRepositories } from "@/infrastructure/RepositoryContext/RepositoryContext";
 import type { Contact } from "@/domain/models/Client/Contact";
 import type { EntityId } from "@/domain/value-objects/EntityId";
-import { ConfirmModal } from "@/ui/components/molecules/confirmModal/ConfirmModal";
-import { ActionButton } from "@/ui/components/molecules/actionButton/ActionButton";
-import "@/ui/components/molecules/confirmModal/ConfirmModal.scss";
+import { ConfirmModal } from "@/ui/components/organisms/confirmModal/ConfirmModal";
+import { ActionButton } from "@/ui/components/atoms/actionButton/ActionButton";
+import "@/ui/components/organisms/confirmModal/ConfirmModal.scss";
 import "./ContactDetail.scss";
 
 const contactSchema = z.object({

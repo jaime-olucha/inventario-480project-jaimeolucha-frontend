@@ -13,12 +13,15 @@ import type { CreateTimeEntryRequestDTO } from "@/infrastructure/dtos/User/Creat
 import { httpClient } from "../http/httpClient";
 import { API_ENDPOINTS } from "../http/types/endpoints";
 import { HttpMethod } from "../http/types/HttpMethods";
-import { mapUser, mapUpdateUserRequest } from "../mappers/mapUser";
+import { mapUser, mapUpdateUserRequest, mapChangePassword } from "../mappers/mapUser";
 import { mapUserProject } from "../mappers/mapUserProject";
 import { mapUserTimeEntry } from "../mappers/mapTimeEntry";
 import { v7 as uuidv7 } from "uuid";
 import type { UserTimeEntry } from "@/domain/models/User/UserTimeEntry";
 import type { UserTimeEntryDTO } from "../dtos/User/UserTimeEntriyDTO";
+import type { ChangePassword } from "@/domain/models/User/ChangePassword";
+import type { ChangePasswordDTO } from "../dtos/User/ChangePasswordDTO";
+import type { AdminChangePasswordDTO } from "../dtos/User/AdminChangePasswordDTO";
 
 export class ApiUserRepository implements UserRepository {
   async getAll(page: number, limit: number): Promise<User[]> {
@@ -104,6 +107,23 @@ export class ApiUserRepository implements UserRepository {
       method: HttpMethod.PUT,
       path: API_ENDPOINTS.USERS.BY_ID(id),
       body,
+    });
+  }
+
+  async patchPassword(id: EntityId, data: ChangePassword): Promise<void> {
+    const body = mapChangePassword(data);
+    await httpClient<void, ChangePasswordDTO>({
+      method: HttpMethod.PATCH,
+      path: API_ENDPOINTS.USERS.PASSWORD_CHANGE(id),
+      body,
+    });
+  }
+
+  async patchAdminPassword(id: EntityId, newPassword: string): Promise<void> {
+    await httpClient<void, AdminChangePasswordDTO>({
+      method: HttpMethod.PATCH,
+      path: API_ENDPOINTS.USERS.ADMIN_PASSWORD_CHANGE(id),
+      body: { new_password: newPassword },
     });
   }
 }

@@ -12,7 +12,7 @@ import { getRoleBadge } from "@/infrastructure/helpers/getRoleBadge";
 import { ROUTES } from "@/ui/routes/routes";
 import { CalendarDays, Clock, Mail, Plus, SquareArrowRightEnter, User } from 'lucide-react';
 import './DashboardPage.scss';
-import { LogoUser } from "@/ui/components/logoUser/LogoUser";
+import { LogoUser } from "@/ui/components/atoms/logoUser/LogoUser";
 
 const today = new Date().toISOString().split("T")[0];
 const PROJECT_COLORS = ["#00b341", "#3b82f6", "#f59e0b", "#8b5cf6", "#ec4899", "#06b6d4", "#f97316", "#14b8a6"];
@@ -20,7 +20,7 @@ const PROJECT_COLORS = ["#00b341", "#3b82f6", "#f59e0b", "#8b5cf6", "#ec4899", "
 const timeEntrySchema = z.object({
   projectId: z.string().min(1, "Selecciona un proyecto"),
   date: z.string().min(1, "La fecha es obligatoria"),
-  hours: z.string().refine((v) => Number(v) > 0, { message: "Introduce un número de horas válido" }),
+  hours: z.string().refine((value) => Number(value) > 0, { message: "Introduce un número de horas válido" }),
   comment: z.string().optional(),
 });
 
@@ -72,7 +72,7 @@ export const DashboardPage = () => {
       setTimeEntries(updatedTimeEntries);
       reset({ projectId: data.projectId, date: today, hours: "", comment: "" });
     } catch {
-      // error shown via form errors
+
     } finally {
       setIsSubmittingHours(false);
     }

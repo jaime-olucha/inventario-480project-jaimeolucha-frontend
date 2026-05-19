@@ -9,15 +9,15 @@ import { ProjectsCounter } from "@/ui/components/molecules/projectsCounter/Proje
 import { useEffect, useRef, useState } from "react";
 import { CreatePersonalModal } from "./CreatePersonalModal";
 import { FiltersCard } from "@/ui/components/organisms/filtersCard/FiltersCard";
-import { FilterSelect } from "@/ui/components/molecules/filterSelect/FilterSelect";
+import { FilterSelect } from "@/ui/components/organisms/filterSelect/FilterSelect";
 import { usePersonalFilters, ROLE_OPTIONS } from "../../../hooks/usePersonalFilters";
 import { usePagination } from "../../../hooks/usePagination";
-import { PaginationControls } from "../../../components/organisms/paginationControls/PaginationControls";
+import { PaginationControls } from "../../../components/molecules/paginationControls/PaginationControls";
 import './PersonalPage.scss';
-import { LogoUser } from "@/ui/components/logoUser/LogoUser";
-import { StatusBadge } from "@/ui/components/molecules/statusBadge/StatusBadge";
+import { LogoUser } from "@/ui/components/atoms/logoUser/LogoUser";
+import { StatusBadge } from "@/ui/components/atoms/statusBadge/StatusBadge";
 import { ROUTES } from "@/ui/routes/routes";
-import { ActionButton } from "@/ui/components/molecules/actionButton/ActionButton";
+import { ActionButton } from "@/ui/components/atoms/actionButton/ActionButton";
 
 const PAGE_LIMIT = 20;
 

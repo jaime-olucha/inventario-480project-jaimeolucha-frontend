@@ -7,22 +7,25 @@ import type { UserProject } from "@/domain/models/User/UserProject";
 import { ROUTES } from "@/ui/routes/routes";
 import type { User } from "@/domain/models/User/User";
 import './PersonalDetailPage.scss';
-import { LogoUser } from "@/ui/components/logoUser/LogoUser";
+import { LogoUser } from "@/ui/components/atoms/logoUser/LogoUser";
 import type { EntityId } from "@/domain/value-objects/EntityId";
-import { ArrowLeft, Edit2, FolderKanban, Mail, Save, Trash2, UserCheck, UserX, X } from "lucide-react";
+import { ArrowLeft, Edit2, FolderKanban, Lock, Mail, Save, Trash2, UserCheck, UserX, X } from "lucide-react";
 import { SYSTEM_ROLES } from "@/domain/value-objects/SystemRole";
-import { ConfirmModal } from "@/ui/components/molecules/confirmModal/ConfirmModal";
+import { ConfirmModal } from "@/ui/components/organisms/confirmModal/ConfirmModal";
 import { getErrorMessage } from "@/infrastructure/helpers/getErrorMessage";
 import { Toast } from "@/ui/components/molecules/toast/Toast";
-import { ActionButton } from "@/ui/components/molecules/actionButton/ActionButton";
+import { ActionButton } from "@/ui/components/atoms/actionButton/ActionButton";
 import type { UpdateUserRequest } from "@/domain/models/User/UpdateUserRequest";
-import '@/ui/components/molecules/confirmModal/ConfirmModal.scss';
+import '@/ui/components/organisms/confirmModal/ConfirmModal.scss';
+import type { ChangePassword } from "@/domain/models/User/ChangePassword";
+import { useAuthStore } from "@/infrastructure/store/auth.store";
 
 
 export const PersonalDetailPage = () => {
   const { id } = useParams<{ id: EntityId }>();
   const navigate = useNavigate();
   const userStore = useUserStore((store) => store.user);
+  const logout = useAuthStore((state) => state.logout);
   const { user: userRepo } = useRepositories();
   const [projects, setProjects] = useState<UserProject[]>([]);
   const [targetUser, setTargetUser] = useState<User>();
@@ -31,6 +34,7 @@ export const PersonalDetailPage = () => {
   const [modalActive, setModalActive] = useState<"inactivar" | "activar" | "eliminar" | null>(null);
   const [loadingPatch, setLoadingPatch] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<UpdateUserRequest>({
     name: "",
@@ -39,6 +43,18 @@ export const PersonalDetailPage = () => {
     isActive: true,
     role: SYSTEM_ROLES.EMPLOYEE,
   });
+
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [editPassword, setEditPassword] = useState<ChangePassword>({
+    currentPassword: "",
+    newPassword: ""
+  });
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const [isChangingAdminPassword, setIsChangingAdminPassword] = useState(false);
+  const [adminNewPassword, setAdminNewPassword] = useState("");
+  const [adminConfirmPassword, setAdminConfirmPassword] = useState("");
+
 
   const isAdmin = userStore?.role === SYSTEM_ROLES.ADMIN;
   const isMyProfile = userStore?.id === targetUser?.id;
@@ -49,6 +65,7 @@ export const PersonalDetailPage = () => {
   const visibleActive = showAllActive ? activeProjects : activeProjects.slice(0, PROJECTS_PREVIEW_LIMIT);
   const visibleInactive = showAllInactive ? inactiveProjects : inactiveProjects.slice(0, PROJECTS_PREVIEW_LIMIT);
 
+  const anyModeActive = isEditing || isChangingPassword || isChangingAdminPassword;
 
   useEffect(() => {
     if (!id) return;
@@ -61,20 +78,12 @@ export const PersonalDetailPage = () => {
   const handleDelete = async () => {
     if (!id) return;
     setLoadingPatch(true);
-
     try {
       await userRepo.deleteUser(id);
-
-      setToast({
-        message: "Empleado eliminado correctamente",
-        type: "success"
-      });
+      setToast({ message: "Empleado eliminado correctamente", type: "success" });
       setTimeout(() => navigate(ROUTES.USER.LIST), 1500);
     } catch (err) {
-      setToast({
-        message: getErrorMessage(err, "No se pudo eliminar el empleado."),
-        type: "error"
-      });
+      setToast({ message: getErrorMessage(err, "No se pudo eliminar el empleado."), type: "error" });
     } finally {
       setLoadingPatch(false);
       setModalActive(null);
@@ -88,19 +97,10 @@ export const PersonalDetailPage = () => {
     try {
       await userRepo.patchActive(id, nextValue);
       setTargetUser((prev) => prev ? { ...prev, isActive: nextValue } : prev);
-      setToast({
-        message: nextValue ? "Activado correctamente" : "Inactivado correctamente",
-        type: "success"
-      });
-
+      setToast({ message: nextValue ? "Activado correctamente" : "Inactivado correctamente", type: "success" });
     } catch (err) {
-      setToast({
-        message: "No se pudo completar la acción. Inténtalo de nuevo.",
-        type: "error"
-      });
-
-      console.log(err)
-
+      setToast({ message: "No se pudo completar la acción. Inténtalo de nuevo.", type: "error" });
+      console.log(err);
     } finally {
       setLoadingPatch(false);
       setModalActive(null);
@@ -121,21 +121,20 @@ export const PersonalDetailPage = () => {
 
   const handleSave = async () => {
     if (!id || !editData) return;
+    const emailChanged = isMyProfile && editData.email !== targetUser?.email;
     setLoadingPatch(true);
     try {
       await userRepo.putUser(id, editData);
+      if (emailChanged) {
+        sessionStorage.setItem('sessionMessage', 'Tu correo ha sido actualizado. Por favor, inicia sesión de nuevo.');
+        logout();
+        return;
+      }
       setTargetUser((prev) => prev ? { ...prev, ...editData } : prev);
-      setToast({
-        message: "Información actualizada correctamente",
-        type: "success"
-      });
+      setToast({ message: "Información actualizada correctamente", type: "success" });
       setIsEditing(false);
     } catch (err) {
-      setToast({
-        message: getErrorMessage(err, "No se pudo guardar los cambios."),
-        type: "error"
-      });
-
+      setToast({ message: getErrorMessage(err, "No se pudo guardar los cambios."), type: "error" });
     } finally {
       setLoadingPatch(false);
     }
@@ -152,6 +151,80 @@ export const PersonalDetailPage = () => {
       ...prev,
       role: isChecked ? SYSTEM_ROLES.ADMIN : SYSTEM_ROLES.EMPLOYEE,
     }));
+  };
+
+  const handlePasswordInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    setEditPassword((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleCancelPassword = () => {
+    setIsChangingPassword(false);
+    setEditPassword({ currentPassword: "", newPassword: "" });
+    setConfirmPassword("");
+  };
+
+  const handlePasswordSave = async () => {
+    if (!id) return;
+
+    if (!editPassword.currentPassword || !editPassword.newPassword || !confirmPassword) {
+      setToast({ message: "Completa todos los campos de contraseña.", type: "error" });
+      return;
+    }
+
+    if (editPassword.newPassword !== confirmPassword) {
+      setToast({ message: "La nueva contraseña y su confirmación no coinciden.", type: "error" });
+      return;
+    }
+
+    setLoadingPatch(true);
+    try {
+      await userRepo.patchPassword(id, editPassword);
+      sessionStorage.setItem('sessionMessage', 'Tu contraseña ha sido actualizada. Por favor, inicia sesión de nuevo.');
+      logout();
+    } catch (err) {
+      setToast({ message: getErrorMessage(err, "No se pudo cambiar la contraseña."), type: "error" });
+    } finally {
+      setLoadingPatch(false);
+    }
+  };
+
+  const handleCancelAdminPassword = () => {
+    setIsChangingAdminPassword(false);
+    setAdminNewPassword("");
+    setAdminConfirmPassword("");
+  };
+
+  const handleAdminPasswordSave = async () => {
+    if (!id) return;
+
+    if (!adminNewPassword || !adminConfirmPassword) {
+      setToast({ message: "Completa todos los campos de contraseña.", type: "error" });
+      return;
+    }
+
+    if (adminNewPassword.length < 8) {
+      setToast({ message: "La contraseña debe tener al menos 8 caracteres.", type: "error" });
+      return;
+    }
+
+    if (adminNewPassword !== adminConfirmPassword) {
+      setToast({ message: "Las contraseñas no coinciden.", type: "error" });
+      return;
+    }
+
+    setLoadingPatch(true);
+    try {
+      await userRepo.patchAdminPassword(id, adminNewPassword);
+      setAdminNewPassword("");
+      setAdminConfirmPassword("");
+      setToast({ message: "Contraseña actualizada correctamente", type: "success" });
+      setIsChangingAdminPassword(false);
+    } catch (err) {
+      setToast({ message: getErrorMessage(err, "No se pudo cambiar la contraseña."), type: "error" });
+    } finally {
+      setLoadingPatch(false);
+    }
   };
 
   return (
@@ -213,17 +286,52 @@ export const PersonalDetailPage = () => {
       <article className="card profile-card">
         <div className="profile-card_top">
           <span className="section-label">Información Personal</span>
-          {isAdmin && !isEditing && (
-            <ActionButton compact icon={<Edit2 size={14} />} onClick={handleEditClick}>Editar</ActionButton>
+
+          {!anyModeActive && (
+            <div className="btn-group">
+              {isAdmin && <ActionButton compact icon={<Edit2 size={14} />} onClick={handleEditClick}>Editar</ActionButton>}
+              {isMyProfile && (
+                <ActionButton compact icon={<Lock size={14} />} onClick={() => setIsChangingPassword(true)}>
+                  Cambiar Contraseña
+                </ActionButton>
+              )}
+              {isAdmin && !isMyProfile && (
+                <ActionButton compact icon={<Lock size={14} />} onClick={() => setIsChangingAdminPassword(true)}>
+                  Cambiar Contraseña
+                </ActionButton>
+              )}
+            </div>
           )}
-          {isAdmin && isEditing && (
+
+          {isEditing && (
             <div className="edit-actions">
               <ActionButton compact icon={<Save size={16} />} onClick={handleSave} disabled={loadingPatch}>
                 {loadingPatch ? "Guardando..." : "Guardar"}
               </ActionButton>
               <button className="btn-cancel" onClick={() => setIsEditing(false)}>
-                <X size={16} />
-                Cancelar
+                <X size={16} /> Cancelar
+              </button>
+            </div>
+          )}
+
+          {isChangingPassword && (
+            <div className="edit-actions">
+              <ActionButton compact icon={<Save size={16} />} onClick={handlePasswordSave} disabled={loadingPatch}>
+                {loadingPatch ? "Guardando..." : "Cambiar contraseña"}
+              </ActionButton>
+              <button className="btn-cancel" onClick={handleCancelPassword}>
+                <X size={16} /> Cancelar
+              </button>
+            </div>
+          )}
+
+          {isChangingAdminPassword && (
+            <div className="edit-actions">
+              <ActionButton compact icon={<Save size={16} />} onClick={handleAdminPasswordSave} disabled={loadingPatch}>
+                {loadingPatch ? "Guardando..." : "Cambiar contraseña"}
+              </ActionButton>
+              <button className="btn-cancel" onClick={handleCancelAdminPassword}>
+                <X size={16} /> Cancelar
               </button>
             </div>
           )}
@@ -231,7 +339,8 @@ export const PersonalDetailPage = () => {
 
         <div className="profile-card_body">
           <LogoUser user={targetUser} className="logo-user" />
-          {!isEditing ? (
+
+          {!anyModeActive && (
             <div className="card-user_info">
               <h3>{targetUser?.name} {targetUser?.surname}</h3>
               <p className="user-email">
@@ -239,45 +348,25 @@ export const PersonalDetailPage = () => {
                 {targetUser?.email}
               </p>
             </div>
-          ) : (
+          )}
+
+          {isEditing && (
             <div className="edit-form">
               <div className="form-row">
                 <div className="form-group">
                   <label htmlFor="name">Nombre</label>
-                  <input
-                    id="name"
-                    name="name"
-                    type="text"
-                    value={editData.name}
-                    onChange={handleInputChange}
-                    className="edit-input"
-                  />
+                  <input id="name" name="name" type="text" value={editData.name} onChange={handleInputChange} className="edit-input" />
                 </div>
                 <div className="form-group">
                   <label htmlFor="surname">Apellido</label>
-                  <input
-                    id="surname"
-                    name="surname"
-                    type="text"
-                    value={editData.surname}
-                    onChange={handleInputChange}
-                    className="edit-input"
-                  />
+                  <input id="surname" name="surname" type="text" value={editData.surname} onChange={handleInputChange} className="edit-input" />
                 </div>
               </div>
               <div className="form-row">
                 <div className="form-group">
                   <label htmlFor="email">Correo Corporativo</label>
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    value={editData.email}
-                    onChange={handleInputChange}
-                    className="edit-input"
-                  />
+                  <input id="email" name="email" type="email" value={editData.email} onChange={handleInputChange} className="edit-input" />
                 </div>
-
                 {userStore?.id !== targetUser?.id && (
                   <div className="form-group checkbox-group">
                     <label>Rol de Usuario</label>
@@ -297,10 +386,77 @@ export const PersonalDetailPage = () => {
               </div>
             </div>
           )}
+
+          {isChangingPassword && (
+            <div className="edit-form">
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="currentPassword">Contraseña actual</label>
+                  <input
+                    id="currentPassword"
+                    name="currentPassword"
+                    type="password"
+                    value={editPassword.currentPassword}
+                    onChange={handlePasswordInputChange}
+                    className="edit-input"
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="newPassword">Nueva contraseña</label>
+                  <input
+                    id="newPassword"
+                    name="newPassword"
+                    type="password"
+                    value={editPassword.newPassword}
+                    onChange={handlePasswordInputChange}
+                    className="edit-input"
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="confirmPassword">Confirmar contraseña</label>
+                  <input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="edit-input"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {isChangingAdminPassword && (
+            <div className="edit-form">
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="adminNewPassword">Nueva contraseña</label>
+                  <input
+                    id="adminNewPassword"
+                    type="password"
+                    value={adminNewPassword}
+                    onChange={(e) => setAdminNewPassword(e.target.value)}
+                    className="edit-input"
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="adminConfirmPassword">Confirmar nueva contraseña</label>
+                  <input
+                    id="adminConfirmPassword"
+                    type="password"
+                    value={adminConfirmPassword}
+                    onChange={(e) => setAdminConfirmPassword(e.target.value)}
+                    className="edit-input"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </article>
 
-      {!isEditing && (
+      {!anyModeActive && (
         <article className="card projects-card">
           <div className="projects-card_top">
             <FolderKanban size={18} className="iconSvg" />

@@ -11,7 +11,7 @@ import { useAuthStore } from "@/infrastructure/store/auth.store";
 import { useRepositories } from "@/infrastructure/RepositoryContext/RepositoryContext";
 import { ROUTES } from "@/ui/routes/routes";
 import { getRoleBadge } from "@/infrastructure/helpers/getRoleBadge";
-import { LogoUser } from "@/ui/components/logoUser/LogoUser";
+import { LogoUser } from "@/ui/components/atoms/logoUser/LogoUser";
 
 export function Sidebar() {
   const [expanded, setExpanded] = useState(true);

@@ -7,13 +7,13 @@ import "./ClientDetailPage.scss";
 import type { EntityId } from "@/domain/value-objects/EntityId";
 import { ArrowLeft, FolderKanban, Trash2, UserCheck, UserX } from "lucide-react";
 import { SYSTEM_ROLES } from "@/domain/value-objects/SystemRole";
-import { ConfirmModal } from "@/ui/components/molecules/confirmModal/ConfirmModal";
+import { ConfirmModal } from "@/ui/components/organisms/confirmModal/ConfirmModal";
 import { getErrorMessage } from "@/infrastructure/helpers/getErrorMessage";
 import { Toast } from "@/ui/components/molecules/toast/Toast";
-import { ClientInfoCard } from "@/ui/components/clientInfoCard/ClientInfoCard";
+import { ClientInfoCard } from "@/ui/components/organisms/clientInfoCard/ClientInfoCard";
 import type { Client } from "@/domain/models/Client/Client";
 import type { ClientProject } from "@/domain/models/Client/ClientProject";
-import "@/ui/components/molecules/confirmModal/ConfirmModal.scss";
+import "@/ui/components/organisms/confirmModal/ConfirmModal.scss";
 
 export const ClientDetailPage = () => {
   const { id } = useParams<{ id: EntityId }>();

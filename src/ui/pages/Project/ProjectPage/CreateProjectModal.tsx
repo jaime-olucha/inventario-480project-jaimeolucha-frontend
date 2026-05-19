@@ -7,7 +7,7 @@ import type { CreateProjectRequest } from "@/domain/models/Project/CreateProject
 import { useEffect, useState } from "react";
 import { useRepositories } from "@/infrastructure/RepositoryContext/RepositoryContext";
 import type { Client } from "@/domain/models/Client/Client";
-import { ActionButton } from "@/ui/components/molecules/actionButton/ActionButton";
+import { ActionButton } from "@/ui/components/atoms/actionButton/ActionButton";
 import "./CreateProjectModal.scss";
 
 const schema = z.object({

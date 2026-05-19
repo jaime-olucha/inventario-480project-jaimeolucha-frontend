@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { useRepositories } from "@/infrastructure/RepositoryContext/RepositoryContext";
 import { useUserStore } from "@/infrastructure/store/user.store";
 import { SYSTEM_ROLES } from "@/domain/value-objects/SystemRole";
-import { ClientInfoCard } from "@/ui/components/clientInfoCard/ClientInfoCard";
+import { ClientInfoCard } from "@/ui/components/organisms/clientInfoCard/ClientInfoCard";
 import { Toast } from "@/ui/components/molecules/toast/Toast";
 import type { EntityId } from "@/domain/value-objects/EntityId";
 import type { ProjectDetail } from "@/domain/models/Project/ProjectDetail";

@@ -6,14 +6,14 @@ import { useEffect, useRef, useState } from "react";
 import { CreateProjectModal } from "./CreateProjectModal";
 import { FiltersCard } from "@/ui/components/organisms/filtersCard/FiltersCard";
 import { usePagination } from "../../../hooks/usePagination";
-import { PaginationControls } from "../../../components/organisms/paginationControls/PaginationControls";
+import { PaginationControls } from "../../../components/molecules/paginationControls/PaginationControls";
 import './ProjectPage.scss';
 import { ROUTES } from "@/ui/routes/routes";
 import { useFilters } from "@/ui/hooks/useFilters";
 import type { CreateProjectRequest } from "@/domain/models/Project/CreateProjectRequest";
 import { SYSTEM_ROLES } from "@/domain/value-objects/SystemRole";
-import { StatusBadge } from "@/ui/components/molecules/statusBadge/StatusBadge";
-import { ActionButton } from "@/ui/components/molecules/actionButton/ActionButton";
+import { StatusBadge } from "@/ui/components/atoms/statusBadge/StatusBadge";
+import { ActionButton } from "@/ui/components/atoms/actionButton/ActionButton";
 import type { UserProject } from "@/domain/models/User/UserProject";
 
 const PAGE_LIMIT = 20;
