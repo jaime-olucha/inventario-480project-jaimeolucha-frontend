@@ -55,3 +55,15 @@
   border-radius: 6px;
   height: 16px;
 }
+
+.card_badge {
+  position: absolute;
+  bottom: 3px;
+  left: 100px;
+  padding: 4px 5px;
+  font-size: 10px;
+  font-weight: bold;
+  background-color: #ffe2e2;
+  color: rgb(202, 14, 14);
+  border-radius: 10px;
+}

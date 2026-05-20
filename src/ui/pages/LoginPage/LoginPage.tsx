@@ -18,6 +18,7 @@ export const LoginPage = () => {
     sessionStorage.removeItem('sessionMessage');
     return msg;
   });
+  const [errorToast, setErrorToast] = useState<string | null>(null);
 
   const { register, handleSubmit, formState: { errors, isSubmitting }
   } = useForm<LoginFormData>({
@@ -25,14 +26,11 @@ export const LoginPage = () => {
   })
 
   const onSubmit = async (data: LoginFormData) => {
-
     try {
       const response = await auth.login(data);
       setTokens(response.token, response.refreshToken);
-
-    } catch (error) {
-
-      console.error("Login error: ", error);
+    } catch {
+      setErrorToast("Credenciales incorrectas. Inténtalo de nuevo.");
     }
   }
 
@@ -46,6 +44,9 @@ export const LoginPage = () => {
 
       {sessionMessage && (
         <Toast message={sessionMessage} type="success" onClose={() => { }} />
+      )}
+      {errorToast && (
+        <Toast message={errorToast} type="error" onClose={() => setErrorToast(null)} />
       )}
 
       <form className="login-page_form" onSubmit={handleSubmit(onSubmit)}>
