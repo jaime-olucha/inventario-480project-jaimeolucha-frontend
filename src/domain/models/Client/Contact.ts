@@ -6,7 +6,6 @@ export interface Contact {
   fullName: string;
   phone?: string;
   email: string;
-  isActive: boolean;
   isMain: boolean;
   note?: string;
 }

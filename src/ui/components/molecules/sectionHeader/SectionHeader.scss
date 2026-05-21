@@ -1,0 +1,14 @@
+.section-header {
+  display: flex;
+  justify-content: space-between;
+
+
+  &--title {
+    font-size: 36px;
+    font-weight: bold;
+  }
+
+  &--description {
+    color: var(--color-text-secondary);
+  }
+}

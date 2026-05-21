@@ -17,7 +17,6 @@ const contactSchema = z.object({
   fullName: z.string().min(1, "El nombre es obligatorio"),
   phone: z.string().optional(),
   email: z.string().min(1, "El email es obligatorio").email("Email no válido"),
-  isActive: z.boolean(),
   isMain: z.boolean(),
   note: z.string().optional(),
 });
@@ -34,7 +33,6 @@ const EMPTY_CONTACT_FORM: ContactForm = {
   fullName: "",
   phone: "",
   email: "",
-  isActive: true,
   isMain: false,
   note: "",
 };
@@ -95,7 +93,6 @@ export const ContactDetail = ({ clientId, isAdmin, onToast }: ContactDetailProps
       fullName: contact.fullName,
       phone: contact.phone ?? "",
       email: contact.email,
-      isActive: contact.isActive,
       isMain: contact.isMain,
       note: contact.note ?? "",
     });
@@ -125,15 +122,19 @@ export const ContactDetail = ({ clientId, isAdmin, onToast }: ContactDetailProps
         return;
       }
 
-      if (contactData.isMain && currentMainContact) {
-        await contactRepo.updateContact(clientId, { ...currentMainContact, isMain: false });
-      }
-
       if (editingContactId) {
-        await contactRepo.updateContact(clientId, { id: editingContactId, ...contactData });
+        if (contactData.isMain && currentMainContact) {
+          await contactRepo.patchMainContact(clientId, { id: editingContactId, ...contactData });
+          await contactRepo.updateContact(clientId, { id: editingContactId, ...contactData });
+        } else {
+          await contactRepo.updateContact(clientId, { id: editingContactId, ...contactData });
+        }
         onToast("Contacto actualizado correctamente", "success");
       } else {
-        await contactRepo.createContact(clientId, contactData);
+        const newId = await contactRepo.createContact(clientId, contactData);
+        if (contactData.isMain) {
+          await contactRepo.patchMainContact(clientId, { id: newId, ...contactData });
+        }
         onToast("Contacto creado correctamente", "success");
       }
 

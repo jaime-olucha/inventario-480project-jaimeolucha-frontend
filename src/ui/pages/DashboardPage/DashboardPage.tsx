@@ -4,6 +4,7 @@ import { CalendarDays, Clock, Mail, Plus, SquareArrowRightEnter, User } from 'lu
 import './DashboardPage.scss';
 import { LogoUser } from "@/ui/components/atoms/logoUser/LogoUser";
 import { useDashboardPage } from "./useDashboardPage";
+import { SectionHeader } from "@/ui/components/molecules/sectionHeader/SectionHeader";
 
 
 export const DashboardPage = () => {
@@ -12,10 +13,10 @@ export const DashboardPage = () => {
 
   return (
     <section className="dashboard-page">
-      <div className="dashboard-page_header">
-        <h1>¡Bienvenid@, {userStore?.name}!</h1>
-        <p className="info">Gestiona tus proyectos y horas de trabajo</p>
-      </div>
+      <SectionHeader
+        title={`¡Bienvenid@, ${userStore?.name}!`}
+        description={`Gestiona tus proyectos y horas de trabajo`}
+      />
 
       <article className="card profile_card">
         <div className="card_logo">
@@ -26,7 +27,7 @@ export const DashboardPage = () => {
           <p><User className="iconSvg" /><strong>Name:</strong> {userStore?.name} {userStore?.surname}</p>
           <p><Mail className="iconSvg" /><strong>Correo:</strong> {userStore?.email}</p>
         </div>
-        {roleBadge && <span className="card_badge">{roleBadge}</span>}
+        {roleBadge && <span className="card_badge--dashboard">{roleBadge}</span>}
       </article>
 
       <article className="card">

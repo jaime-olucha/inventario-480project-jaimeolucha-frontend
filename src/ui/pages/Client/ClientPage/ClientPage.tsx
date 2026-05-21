@@ -19,6 +19,7 @@ import { Toast } from "@/ui/components/molecules/toast/Toast";
 import { getErrorMessage } from "@/infrastructure/helpers/getErrorMessage";
 import { StatusBadge } from "@/ui/components/atoms/statusBadge/StatusBadge";
 import { ActionButton } from "@/ui/components/atoms/actionButton/ActionButton";
+import { SectionHeader } from "@/ui/components/molecules/sectionHeader/SectionHeader";
 
 const PAGE_LIMIT = 20;
 
@@ -88,15 +89,15 @@ export const ClientPage = () => {
   return (
     <section className="section-page">
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
-      <div className="section-page_header">
-        <div className="header_title">
-          <h1>Clientes</h1>
-          <p className="info">Gestiona los clientes de la empresa</p>
-        </div>
-        <ActionButton ref={addBtnRef} compact icon={<Plus size={20} />} onClick={() => setIsModalOpen(true)}>
-          Nuevo Cliente
-        </ActionButton>
-      </div>
+      <SectionHeader
+        title="Clientes"
+        description="Gestiona los clientes de la empresa"
+        action={
+          <ActionButton ref={addBtnRef} compact icon={<Plus size={20} />} onClick={() => setIsModalOpen(true)}>
+            Nuevo Cliente
+          </ActionButton>
+        }
+      />
 
       {isModalOpen && (
         <CreateClientModal
