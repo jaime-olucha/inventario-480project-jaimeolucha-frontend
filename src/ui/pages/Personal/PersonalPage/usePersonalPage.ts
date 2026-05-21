@@ -3,7 +3,7 @@ import type { User } from "@/domain/models/User/User";
 import { useRepositories } from "@/infrastructure/RepositoryContext/RepositoryContext";
 import { useUserStore } from "@/infrastructure/store/user.store";
 import { usePagination } from "@/ui/hooks/usePagination";
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 
 
 export const usePersonalPage = () => {
@@ -11,9 +11,6 @@ export const usePersonalPage = () => {
   const { user: userRepo } = useRepositories();
   const [users, setUsers] = useState<User[]>([]);
   const [activeProjectCounts, setActiveProjectCounts] = useState<Record<string, number>>({});
-  const [showFab, setShowFab] = useState(false);
-  const addBtnRef = useRef<HTMLButtonElement>(null);
-
   const PAGE_LIMIT = 20;
   const { page, limit, isFirst, isLast, setIsLast, goNext, goPrev } = usePagination(PAGE_LIMIT);
 
@@ -37,17 +34,6 @@ export const usePersonalPage = () => {
     });
   }, [users]);
 
-  useEffect(() => {
-    const btn = addBtnRef.current;
-    if (!btn) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => setShowFab(!entry.isIntersecting),
-      { threshold: 0 }
-    );
-    observer.observe(btn);
-    return () => observer.disconnect();
-  }, []);
-
   const handleCreateUser = async (data: CreateUserRequest) => {
     await userRepo.createUser(data);
     const result = await userRepo.getAll(page, limit);
@@ -57,7 +43,6 @@ export const usePersonalPage = () => {
 
   return {
     activeProjectCounts,
-    showFab,
     isFirst,
     isLast,
     page,

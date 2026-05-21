@@ -14,13 +14,15 @@ import { ROUTES } from "@/ui/routes/routes";
 import { ActionButton } from "@/ui/components/atoms/actionButton/ActionButton";
 import { SectionHeader } from "@/ui/components/molecules/sectionHeader/SectionHeader";
 import { useModal } from "@/ui/hooks/useModal";
+import { useFab } from "@/ui/hooks/useFab";
 import { usePersonalPage } from "./usePersonalPage";
 
 
 export const PersonalPage = () => {
-  const { activeProjectCounts, showFab, isFirst, isLast, page, users, goNext, goPrev, handleCreateUser } = usePersonalPage();
+  const { activeProjectCounts, isFirst, isLast, page, users, goNext, goPrev, handleCreateUser } = usePersonalPage();
   const { search, setSearch, status, setStatus, role, setRole, filteredUsers } = usePersonalFilters(users);
   const { isOpen, open, close } = useModal();
+  const { btnRef, showFab } = useFab();
 
   return (
     <section className="section-page">
@@ -28,7 +30,7 @@ export const PersonalPage = () => {
         title="Personal"
         description="Gestiona el personal de la empresa"
         action={
-          <ActionButton icon={<UserPlus size={20} />} onClick={open}>
+          <ActionButton ref={btnRef} icon={<UserPlus size={20} />} onClick={open}>
             Nuevo Personal
           </ActionButton>
         }
