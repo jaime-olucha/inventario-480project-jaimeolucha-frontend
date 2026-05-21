@@ -20,14 +20,14 @@
 
 ## Patrones duplicados detectados (a resolver con infraestructura compartida)
 
-### 1. Toast state — duplicado en 8+ componentes
+### 1. Toast state — duplicado en 8+ componentes ✅
 ```ts
 // Repetido en TODOS los DetailPage y todos los organismos
 const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
 ```
 **Solución:** Nuevo hook `useToast`.
 
-### 2. FAB con IntersectionObserver — duplicado en 3 sitios
+### 2. FAB con IntersectionObserver — duplicado en 3 sitios ✅
 ```ts
 // Repetido en PersonalPage (usePersonalPage), ProjectPage, ClientPage
 const addBtnRef = useRef<HTMLButtonElement>(null);
@@ -39,7 +39,7 @@ useEffect(() => {
 ```
 **Solución:** Nuevo hook `useFab`.
 
-### 3. Toggle-active + Delete con modal de confirmación — duplicado en 3 DetailPages
+### 3. Toggle-active + Delete con modal de confirmación — duplicado en 3 DetailPages ✅
 ```ts
 // Repetido en PersonalDetailPage, ProjectDetailPage, ClientDetailPage
 const [modalActive, setModalActive] = useState<"inactivar" | "activar" | "eliminar" | null>(null);
@@ -49,7 +49,7 @@ const handleDelete = async () => { ... deleteEntity ... navigate ... }
 ```
 **Solución:** Nuevo hook `useEntityActions`.
 
-### 4. Lista de proyectos activos/inactivos con expand — duplicado JSX idéntico
+### 4. Lista de proyectos activos/inactivos con expand — duplicado JSX idéntico ✅
 ```ts
 // Misma lógica Y misma vista en PersonalDetailPage y ClientDetailPage
 const activeProjects = projects.filter(p => p.isActive);
@@ -60,7 +60,7 @@ const PROJECTS_PREVIEW_LIMIT = 2;
 ```
 **Solución:** Nuevo componente `ProjectsListCard` + hook `useProjectsPreview`.
 
-### 5. `useModal` existe pero nadie lo usa
+### 5. `useModal` existe pero nadie lo usa ✅
 ```ts
 // Todos hacen esto en vez de usar useModal:
 const [isModalOpen, setIsModalOpen] = useState(false);
@@ -73,19 +73,19 @@ const [isModalOpen, setIsModalOpen] = useState(false);
 
 > Estas piezas son las que hacen posible la reutilización en las fases siguientes. Deben ir primero.
 
-### Paso 0.1 — Hook `useToast`
+### Paso 0.1 — Hook `useToast` ✅
 - **Archivo nuevo:** `src/ui/hooks/useToast.ts`
 - **Qué hace:** encapsula `useState` del toast, expone `toast`, `showToast(msg, type)`, `closeToast`
 - **Reemplaza:** el patrón `useState<{message, type} | null>` manual en cada componente
 - **Beneficio:** 8+ componentes lo usarán sin duplicar
 
-### Paso 0.2 — Hook `useFab`
+### Paso 0.2 — Hook `useFab` ✅
 - **Archivo nuevo:** `src/ui/hooks/useFab.ts`
 - **Qué hace:** encapsula `useRef` + `IntersectionObserver` para el botón FAB, expone `addBtnRef` y `showFab`
 - **Reemplaza:** el `useEffect` con IntersectionObserver en `usePersonalPage`, `ProjectPage`, `ClientPage`
 - **Nota:** actualizar `usePersonalPage` para consumir `useFab`
 
-### Paso 0.3 — Hook `useEntityActions`
+### Paso 0.3 — Hook `useEntityActions` ✅
 - **Archivo nuevo:** `src/ui/hooks/useEntityActions.ts`
 - **Qué hace:** gestiona `modalActive`, `loadingPatch`, `handleToggleActive`, `handleDelete` de forma genérica mediante callbacks
 - **Reemplaza:** la triada toggle/delete/loadingPatch duplicada en PersonalDetailPage, ProjectDetailPage, ClientDetailPage
@@ -99,13 +99,13 @@ const [isModalOpen, setIsModalOpen] = useState(false);
   // retorna: { modalActive, setModalActive, loadingPatch, handleToggleActive, handleDelete }
   ```
 
-### Paso 0.4 — Hook `useProjectsPreview`
+### Paso 0.4 — Hook `useProjectsPreview` ✅
 - **Archivo nuevo:** `src/ui/hooks/useProjectsPreview.ts`
 - **Qué hace:** recibe `projects`, separa activos/inactivos, gestiona `showAllActive/showAllInactive`, aplica `PROJECTS_PREVIEW_LIMIT`
 - **Reemplaza:** lógica idéntica en PersonalDetailPage y ClientDetailPage
 - **Retorna:** `activeProjects`, `inactiveProjects`, `visibleActive`, `visibleInactive`, `showAllActive`, `setShowAllActive`, `showAllInactive`, `setShowAllInactive`
 
-### Paso 0.5 — Componente `ProjectsListCard`
+### Paso 0.5 — Componente `ProjectsListCard` ✅
 - **Archivo nuevo:** `src/ui/components/organisms/projectsListCard/ProjectsListCard.tsx`
 - **Qué hace:** renderiza la tarjeta de proyectos activos/inactivos con expand/collapse
 - **Props:** `projects`, `entityLabel` (para el texto "estás asignado" vs "ha participado"), opcionalmente `linkable` (en PersonalDetail los activos tienen Link, en ClientDetail también)
@@ -120,7 +120,7 @@ const [isModalOpen, setIsModalOpen] = useState(false);
 - **Reemplaza:** el bloque `<div className="..._header">` repetido en PersonalDetailPage, ProjectDetailPage, ClientDetailPage
 - **Diseño:** exactamente el mismo HTML/CSS, solo extracción
 
-### Paso 0.7 — Adoptar `useModal` donde ya debería usarse
+### Paso 0.7 — Adoptar `useModal` donde ya debería usarse ✅
 - **Archivos a actualizar:** `ProjectPage.tsx`, `ClientPage.tsx` y los hooks de página que se creen
 - **Qué cambia:** `const [isModalOpen, setIsModalOpen] = useState(false)` → `const { isOpen, open, close } = useModal()`
 - **Diseño:** sin cambio visible
@@ -129,7 +129,7 @@ const [isModalOpen, setIsModalOpen] = useState(false);
 
 ## FASE 1 — `PersonalDetailPage` (prioridad ALTA — 530 líneas, 3 flujos de formulario)
 
-### Paso 1.1 — Hook `usePersonalDetailPage`
+### Paso 1.1 — Hook `usePersonalDetailPage` ✅
 - **Archivo nuevo:** `src/ui/pages/Personal/PersonalDetailPage/usePersonalDetailPage.ts`
 - **Extrae de `PersonalDetailPage.tsx`:**
   - fetch de `targetUser` y `projects` por `id`
@@ -140,14 +140,14 @@ const [isModalOpen, setIsModalOpen] = useState(false);
 - **Usa:** `useEntityActions` (paso 0.3), `useToast` (paso 0.1), `useProjectsPreview` (paso 0.4)
 - **`PersonalDetailPage.tsx` resultante:** solo JSX + destructuring del hook
 
-### Paso 1.2 — Componente `UserInfoCard`
+### Paso 1.2 — Componente `UserInfoCard` ✅
 - **Archivo nuevo:** `src/ui/components/organisms/userInfoCard/UserInfoCard.tsx`
 - **Qué hace:** renderiza el bloque `<article className="card profile-card">` con sus tres modos (vista / editar info / cambiar contraseña / cambiar contraseña admin)
 - **Props:** todos los valores y handlers que vienen del hook
 - **Usa:** `DetailPageHeader` internamente para los botones de acción de la tarjeta
 - **Diseño:** idéntico al actual
 
-### Paso 1.3 — Actualizar `PersonalDetailPage` para usar `ProjectsListCard` y `DetailPageHeader`
+### Paso 1.3 — Actualizar `PersonalDetailPage` para usar `ProjectsListCard` y `DetailPageHeader` ✅
 - Sustituir el bloque de cabecera por `<DetailPageHeader>` (paso 0.6)
 - Sustituir el bloque de proyectos por `<ProjectsListCard>` (paso 0.5)
 
@@ -155,7 +155,7 @@ const [isModalOpen, setIsModalOpen] = useState(false);
 
 ## FASE 2 — `ProjectTeam` organism (prioridad ALTA — 478 líneas, lógica de roles compleja)
 
-### Paso 2.1 — Hook `useProjectTeam`
+### Paso 2.1 — Hook `useProjectTeam` ✅
 - **Archivo nuevo:** `src/ui/components/organisms/projectTeam/useProjectTeam.ts`
 - **Extrae de `ProjectTeam.tsx`:**
   - fetches: `team`, `users`, `projectRoles`
@@ -166,13 +166,13 @@ const [isModalOpen, setIsModalOpen] = useState(false);
 - **Usa:** `useToast` (paso 0.1)
 - **`ProjectTeam.tsx` resultante:** solo JSX
 
-### Paso 2.2 — Componente `TeamMemberCard`
+### Paso 2.2 — Componente `TeamMemberCard` ✅
 - **Archivo nuevo:** `src/ui/components/organisms/projectTeam/TeamMemberCard.tsx`
 - **Qué hace:** renderiza el `<article className="team-member">` con su badge de rol y menú de opciones
 - **Props:** `member`, `canEdit`, `saving`, `onEdit`, `onInactivate`, `onDeactivate`
 - **Reemplaza:** el bloque dentro del `.map` en la lista de equipo
 
-### Paso 2.3 — Componente `RoleSummaryBar`
+### Paso 2.3 — Componente `RoleSummaryBar` ✅
 - **Archivo nuevo:** `src/ui/components/organisms/projectTeam/RoleSummaryBar.tsx`
 - **Qué hace:** renderiza las 4 tarjetas de resumen (PM, KAM, Tech Leader, Total)
 - **Props:** `projectManager`, `kam`, `techLeader`, `totalCount`

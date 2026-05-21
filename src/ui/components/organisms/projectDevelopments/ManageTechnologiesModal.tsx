@@ -9,6 +9,7 @@ import type { Technology } from "@/domain/models/Project/Technology";
 import type { EntityId } from "@/domain/value-objects/EntityId";
 import "@/ui/components/organisms/confirmModal/ConfirmModal.scss";
 import "./ManageTechnologiesModal.scss";
+import { useToast } from "@/ui/hooks/useToast";
 
 interface ManageTechnologiesModalProps {
   onClose: () => void;
@@ -23,7 +24,7 @@ export const ManageTechnologiesModal = ({ onClose, onChanged, onSuccess }: Manag
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [editingId, setEditingId] = useState<EntityId | null>(null);
-  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const { toast, showToast, closeToast } = useToast();
   const [techToDelete, setTechToDelete] = useState<Technology | null>(null);
 
   const addForm = useForm<{ name: string }>({ defaultValues: { name: "" } });
@@ -50,7 +51,7 @@ export const ManageTechnologiesModal = ({ onClose, onChanged, onSuccess }: Manag
       onChanged();
       onSuccess?.("Tecnología creada correctamente.");
     } catch (error) {
-      setToast({ message: getErrorMessage(error, "No se pudo crear la tecnología."), type: "error" });
+      showToast(getErrorMessage(error, "No se pudo crear la tecnología."));
     } finally {
       setActionLoading(false);
     }
@@ -65,7 +66,7 @@ export const ManageTechnologiesModal = ({ onClose, onChanged, onSuccess }: Manag
       onChanged();
       onSuccess?.("Tecnología actualizada correctamente.");
     } catch (error) {
-      setToast({ message: getErrorMessage(error, "No se pudo actualizar la tecnología."), type: "error" });
+      showToast(getErrorMessage(error, "No se pudo actualizar la tecnología."));
     } finally {
       setActionLoading(false);
     }
@@ -81,7 +82,7 @@ export const ManageTechnologiesModal = ({ onClose, onChanged, onSuccess }: Manag
       onChanged();
       onSuccess?.("Tecnología eliminada correctamente.");
     } catch (error) {
-      setToast({ message: getErrorMessage(error, "No se pudo eliminar la tecnología."), type: "error" });
+      showToast(getErrorMessage(error, "No se pudo eliminar la tecnología."));
     } finally {
       setActionLoading(false);
     }
@@ -94,7 +95,7 @@ export const ManageTechnologiesModal = ({ onClose, onChanged, onSuccess }: Manag
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
 
       {techToDelete && (
         <ConfirmModal

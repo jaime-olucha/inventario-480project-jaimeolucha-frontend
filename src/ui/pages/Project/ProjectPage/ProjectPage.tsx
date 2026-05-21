@@ -2,7 +2,8 @@
 import { useRepositories } from "@/infrastructure/RepositoryContext/RepositoryContext";
 import { useUserStore } from "@/infrastructure/store/user.store";
 import { FolderPlus, User as UserIcon } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import { useFab } from "@/ui/hooks/useFab";
 import { CreateProjectModal } from "./CreateProjectModal";
 import { FiltersCard } from "@/ui/components/organisms/filtersCard/FiltersCard";
 import { usePagination } from "../../../hooks/usePagination";
@@ -15,6 +16,7 @@ import { SYSTEM_ROLES } from "@/domain/value-objects/SystemRole";
 import { StatusBadge } from "@/ui/components/atoms/statusBadge/StatusBadge";
 import { ActionButton } from "@/ui/components/atoms/actionButton/ActionButton";
 import type { UserProject } from "@/domain/models/User/UserProject";
+import { useModal } from "@/ui/hooks/useModal";
 
 const PAGE_LIMIT = 20;
 
@@ -22,10 +24,7 @@ export const ProjectPage = () => {
   const userStore = useUserStore((store) => store.user);
   const { project: projectRepo, user: userRepo } = useRepositories();
   const [projects, setProjects] = useState<UserProject[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [showFab, setShowFab] = useState(false);
-  const addBtnRef = useRef<HTMLButtonElement>(null);
-
+  const { isOpen: isModalOpen, open: openModal, close: closeModal } = useModal();
   const { page, limit, isFirst, isLast, setIsLast, goNext, goPrev } = usePagination(PAGE_LIMIT);
   const isAdmin = userStore?.role === SYSTEM_ROLES.ADMIN;
   const { search, setSearch, status, setStatus, filtered } = useFilters(projects);
@@ -46,16 +45,7 @@ export const ProjectPage = () => {
     }
   }, [userStore, projectRepo, userRepo, page, limit]);
 
-  useEffect(() => {
-    const btn = addBtnRef.current;
-    if (!btn) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => setShowFab(!entry.isIntersecting),
-      { threshold: 0 }
-    );
-    observer.observe(btn);
-    return () => observer.disconnect();
-  }, [isAdmin]);
+  const { btnRef, showFab } = useFab();
 
   const handleCreateProject = async (data: CreateProjectRequest) => {
     await projectRepo.createProject(data);
@@ -73,7 +63,7 @@ export const ProjectPage = () => {
         </div>
 
         {userStore?.role === SYSTEM_ROLES.ADMIN && (
-          <ActionButton ref={addBtnRef} compact icon={<FolderPlus size={20} />} onClick={() => setIsModalOpen(true)}>
+          <ActionButton ref={btnRef} compact icon={<FolderPlus size={20} />} onClick={openModal}>
             Nuevo Proyecto
           </ActionButton>
         )}
@@ -81,7 +71,7 @@ export const ProjectPage = () => {
 
       {isModalOpen && (
         <CreateProjectModal
-          onClose={() => setIsModalOpen(false)}
+          onClose={closeModal}
           onSubmit={handleCreateProject}
         />
       )}
@@ -122,7 +112,7 @@ export const ProjectPage = () => {
       <PaginationControls page={page} isFirst={isFirst} isLast={isLast} onPrev={goPrev} onNext={goNext} />
 
       {showFab && (
-        <ActionButton className="action-button--fab" icon={<FolderPlus size={20} />} onClick={() => setIsModalOpen(true)}>
+        <ActionButton className="action-button--fab" icon={<FolderPlus size={20} />} onClick={openModal}>
           <span className="sr-only">Nuevo Proyecto</span>
         </ActionButton>
       )}

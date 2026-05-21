@@ -8,6 +8,7 @@ import { ConfirmModal } from "@/ui/components/organisms/confirmModal/ConfirmModa
 import type { Sector } from "@/domain/models/Client/Sector";
 import type { EntityId } from "@/domain/value-objects/EntityId";
 import "./ManageSectorsModal.scss";
+import { useToast } from "@/ui/hooks/useToast";
 
 interface ManageSectorsModalProps {
   onClose: () => void;
@@ -21,7 +22,7 @@ export const ManageSectorsModal = ({ onClose, onSectorsChanged, onSuccess }: Man
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<EntityId | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
-  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const { toast, showToast, closeToast } = useToast();
   const [sectorToDelete, setSectorToDelete] = useState<Sector | null>(null);
 
   const addForm = useForm<{ name: string }>({ defaultValues: { name: "" } });
@@ -51,7 +52,7 @@ export const ManageSectorsModal = ({ onClose, onSectorsChanged, onSuccess }: Man
       onSuccess?.("Sector creado correctamente");
       onClose();
     } catch (error) {
-      setToast({ message: getErrorMessage(error, "No se pudo crear el sector."), type: "error" });
+      showToast(getErrorMessage(error, "No se pudo crear el sector."));
     } finally {
       setActionLoading(false);
     }
@@ -67,7 +68,7 @@ export const ManageSectorsModal = ({ onClose, onSectorsChanged, onSuccess }: Man
       onSuccess?.("Sector actualizado correctamente");
       onClose();
     } catch (error) {
-      setToast({ message: getErrorMessage(error, "No se pudo actualizar el sector."), type: "error" });
+      showToast(getErrorMessage(error, "No se pudo actualizar el sector."));
     } finally {
       setActionLoading(false);
     }
@@ -87,7 +88,7 @@ export const ManageSectorsModal = ({ onClose, onSectorsChanged, onSuccess }: Man
       onSuccess?.("Sector eliminado correctamente");
       onClose();
     } catch (error) {
-      setToast({ message: getErrorMessage(error, "No se pudo eliminar el sector."), type: "error" });
+      showToast(getErrorMessage(error, "No se pudo eliminar el sector."));
     } finally {
       setActionLoading(false);
       setSectorToDelete(null);
@@ -101,7 +102,7 @@ export const ManageSectorsModal = ({ onClose, onSectorsChanged, onSuccess }: Man
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
 
       {sectorToDelete && (
         <ConfirmModal

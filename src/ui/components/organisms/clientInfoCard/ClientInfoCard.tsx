@@ -9,6 +9,7 @@ import type { Client } from "@/domain/models/Client/Client";
 import type { Sector } from "@/domain/models/Client/Sector";
 import type { UpdateClientRequest } from "@/domain/models/Client/UpdateClientRequest";
 import type { EntityId } from "@/domain/value-objects/EntityId";
+import { useModal } from "@/ui/hooks/useModal";
 import "./ClientInfoCard.scss";
 
 interface ClientInfoCardProps {
@@ -25,7 +26,7 @@ export const ClientInfoCard = ({ clientId, isAdmin, onToast, onClientLoaded }: C
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<UpdateClientRequest>({ name: "", isActive: true, sectorId: "" as EntityId });
   const [saving, setSaving] = useState(false);
-  const [isManageSectorsOpen, setIsManageSectorsOpen] = useState(false);
+  const { isOpen: isManageSectorsOpen, open: openManageSectors, close: closeManageSectors } = useModal();
 
   useEffect(() => {
     clientRepo.getById(clientId).then((loaded) => {
@@ -80,7 +81,7 @@ export const ClientInfoCard = ({ clientId, isAdmin, onToast, onClientLoaded }: C
     <article className="client-info-card">
       {isManageSectorsOpen && (
         <ManageSectorsModal
-          onClose={() => setIsManageSectorsOpen(false)}
+          onClose={closeManageSectors}
           onSectorsChanged={refreshSectors}
           onSuccess={(msg) => onToast(msg, "success")}
         />
@@ -139,7 +140,7 @@ export const ClientInfoCard = ({ clientId, isAdmin, onToast, onClientLoaded }: C
                 <div className="form-group">
                   <div className="field-header">
                     <label htmlFor="cic-sector">Sector</label>
-                    <button type="button" className="btn-inline-action" onClick={() => setIsManageSectorsOpen(true)}>
+                    <button type="button" className="btn-inline-action" onClick={openManageSectors}>
                       <ListTree size={12} /> Gestionar Sectores
                     </button>
                   </div>

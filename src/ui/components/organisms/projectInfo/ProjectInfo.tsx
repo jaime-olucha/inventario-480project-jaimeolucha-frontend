@@ -14,6 +14,7 @@ import { Toast } from "@/ui/components/molecules/toast/Toast";
 import { getErrorMessage } from "@/infrastructure/helpers/getErrorMessage";
 import "./ProjectInfo.scss";
 import type { UpdateProjectRequest } from "@/domain/models/Project/UpdateProjectRequest";
+import { useToast } from "@/ui/hooks/useToast";
 
 type EditForm = Omit<UpdateProjectRequest, 'isActive'>
 
@@ -41,7 +42,7 @@ export const ProjectInfo = ({ isActive: isActiveProp }: ProjectInfoProps) => {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const { toast, showToast, closeToast } = useToast();
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<EditForm>();
 
@@ -101,9 +102,9 @@ export const ProjectInfo = ({ isActive: isActiveProp }: ProjectInfoProps) => {
       } : prev);
 
       setEditing(false);
-      setToast({ message: "Proyecto actualizado correctamente.", type: "success" });
+      showToast("Proyecto actualizado correctamente.", "success");
     } catch (err) {
-      setToast({ message: getErrorMessage(err, "No se pudo guardar el proyecto."), type: "error" });
+      showToast(getErrorMessage(err, "No se pudo guardar el proyecto."));
     } finally {
       setSaving(false);
     }
@@ -137,7 +138,7 @@ export const ProjectInfo = ({ isActive: isActiveProp }: ProjectInfoProps) => {
   return (
     <div className="project-info">
       {toast && (
-        <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
+        <Toast message={toast.message} type={toast.type} onClose={closeToast} />
       )}
       <div className="card">
         <div className="card-header">

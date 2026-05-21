@@ -3,7 +3,8 @@ import { useRepositories } from "@/infrastructure/RepositoryContext/RepositoryCo
 import { useUserStore } from "@/infrastructure/store/user.store";
 import { Building2, Plus } from "lucide-react";
 import { ProjectsCounter } from "@/ui/components/molecules/projectsCounter/ProjectsCounter";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import { useFab } from "@/ui/hooks/useFab";
 import { FilterSelect } from "@/ui/components/organisms/filterSelect/FilterSelect";
 import type { Sector } from "@/domain/models/Client/Sector";
 import { FiltersCard } from "@/ui/components/organisms/filtersCard/FiltersCard";
@@ -20,6 +21,8 @@ import { getErrorMessage } from "@/infrastructure/helpers/getErrorMessage";
 import { StatusBadge } from "@/ui/components/atoms/statusBadge/StatusBadge";
 import { ActionButton } from "@/ui/components/atoms/actionButton/ActionButton";
 import { SectionHeader } from "@/ui/components/molecules/sectionHeader/SectionHeader";
+import { useToast } from "@/ui/hooks/useToast";
+import { useModal } from "@/ui/hooks/useModal";
 
 const PAGE_LIMIT = 20;
 
@@ -28,12 +31,11 @@ export const ClientPage = () => {
   const { client: clientRepo, sector: sectorRepo } = useRepositories();
   const [clients, setClients] = useState<Client[]>([]);
   const [sectors, setSectors] = useState<Sector[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeProjectCounts, setActiveProjectCounts] = useState<Record<string, number>>({});
-  const [showFab, setShowFab] = useState(false);
   const [selectedSectorId, setSelectedSectorId] = useState<string>('all');
-  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
-  const addBtnRef = useRef<HTMLButtonElement>(null);
+  const { toast, showToast, closeToast } = useToast();
+  const { isOpen: isModalOpen, open: openModal, close: closeModal } = useModal();
+  const { btnRef, showFab } = useFab({ rootMargin: '-60px 0px 0px 0px' });
   const { page, limit, isFirst, isLast, setIsLast, goNext, goPrev } = usePagination(PAGE_LIMIT);
   const { search, setSearch, status, setStatus, filtered: baseFiltered } = useFilters(clients);
 
@@ -63,37 +65,26 @@ export const ClientPage = () => {
   }, [clients]);
 
 
-  useEffect(() => {
-    const btn = addBtnRef.current;
-    if (!btn) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => setShowFab(!entry.isIntersecting),
-      { threshold: 0, rootMargin: '-60px 0px 0px 0px' }
-    );
-    observer.observe(btn);
-    return () => observer.disconnect();
-  }, []);
-
   const handleCreateClient = async (data: CreateClientRequest) => {
     try {
       await clientRepo.createClient(data);
       const result = await clientRepo.getAll(page, limit);
       setClients(result);
       setIsLast(result.length < limit);
-      setToast({ message: "Cliente creado correctamente", type: "success" });
+      showToast("Cliente creado correctamente", "success");
     } catch (error) {
-      setToast({ message: getErrorMessage(error, "No se pudo crear el cliente."), type: "error" });
+      showToast(getErrorMessage(error, "No se pudo crear el cliente."));
     }
   };
 
   return (
     <section className="section-page">
-      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
       <SectionHeader
         title="Clientes"
         description="Gestiona los clientes de la empresa"
         action={
-          <ActionButton ref={addBtnRef} compact icon={<Plus size={20} />} onClick={() => setIsModalOpen(true)}>
+          <ActionButton ref={btnRef} compact icon={<Plus size={20} />} onClick={openModal}>
             Nuevo Cliente
           </ActionButton>
         }
@@ -101,7 +92,7 @@ export const ClientPage = () => {
 
       {isModalOpen && (
         <CreateClientModal
-          onClose={() => setIsModalOpen(false)}
+          onClose={closeModal}
           onSubmit={handleCreateClient}
         />
       )}
@@ -122,7 +113,7 @@ export const ClientPage = () => {
             value={selectedSectorId}
             options={[
               { value: 'all', label: 'Todos los sectores' },
-              ...sectors.map(s => ({ value: String(s.id), label: s.name }))
+              ...sectors.map(sector => ({ value: String(sector.id), label: sector.name }))
             ]}
             onChange={setSelectedSectorId}
           />
@@ -154,7 +145,7 @@ export const ClientPage = () => {
       <PaginationControls page={page} isFirst={isFirst} isLast={isLast} onPrev={goPrev} onNext={goNext} />
 
       {showFab && (
-        <ActionButton className="action-button--fab" icon={<Plus size={20} />} onClick={() => setIsModalOpen(true)}>
+        <ActionButton className="action-button--fab" icon={<Plus size={20} />} onClick={openModal}>
           <span className="sr-only">Nuevo Cliente</span>
         </ActionButton>
       )}

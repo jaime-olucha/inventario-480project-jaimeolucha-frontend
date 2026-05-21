@@ -11,6 +11,8 @@ import { ActionButton } from "@/ui/components/atoms/actionButton/ActionButton";
 import type { Sector } from "@/domain/models/Client/Sector";
 import type { CreateClientRequest } from "@/domain/models/Client/CreateClientRequest";
 import "./CreateClientModal.scss";
+import { useToast } from "@/ui/hooks/useToast";
+import { useModal } from "@/ui/hooks/useModal";
 
 const schema = z.object({
   name: z.string().min(1, "El nombre es obligatorio"),
@@ -28,8 +30,8 @@ export const CreateClientModal = ({ onClose, onSubmit }: Props) => {
   const { sector: sectorRepo } = useRepositories();
   const [sectors, setSectors] = useState<Sector[]>([]);
   const [serverError, setServerError] = useState<string | null>(null);
-  const [isManageSectorsOpen, setIsManageSectorsOpen] = useState(false);
-  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const { toast, showToast, closeToast } = useToast();
+  const { isOpen: isManageSectorsOpen, open: openManageSectors, close: closeManageSectors } = useModal();
 
   const { register, handleSubmit, control, formState: { errors, isSubmitting } } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -61,7 +63,7 @@ export const CreateClientModal = ({ onClose, onSubmit }: Props) => {
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
       <div className="modal" onClick={event => event.stopPropagation()}>
         <div className="modal_header">
           <h2><Building2 className="iconHeader" /> Nuevo Cliente</h2>
@@ -70,9 +72,9 @@ export const CreateClientModal = ({ onClose, onSubmit }: Props) => {
 
         {isManageSectorsOpen && (
           <ManageSectorsModal
-            onClose={() => setIsManageSectorsOpen(false)}
+            onClose={closeManageSectors}
             onSectorsChanged={fetchSectors}
-            onSuccess={(msg) => setToast({ message: msg, type: "success" })}
+            onSuccess={(msg) => showToast(msg, "success")}
           />
         )}
 
@@ -95,7 +97,7 @@ export const CreateClientModal = ({ onClose, onSubmit }: Props) => {
                   <button
                     type="button"
                     className="btn-inline-action"
-                    onClick={() => setIsManageSectorsOpen(true)}
+                    onClick={openManageSectors}
                   >
                     <ListTree size={12} /> Gestionar Sectores
                   </button>

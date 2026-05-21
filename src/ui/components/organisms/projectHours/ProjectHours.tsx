@@ -16,6 +16,7 @@ import type { ProjectTimeEntry } from "@/domain/models/Project/ProjectTimeEntry"
 import type { EntityId } from "@/domain/value-objects/EntityId";
 import "@/ui/components/organisms/confirmModal/ConfirmModal.scss";
 import "./ProjectHours.scss";
+import { useToast } from "@/ui/hooks/useToast";
 
 const today = new Date().toISOString().split("T")[0];
 
@@ -46,7 +47,7 @@ export const ProjectHours = () => {
   const [isMember, setIsMember] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const { toast, showToast, closeToast } = useToast();
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<EntityId | null>(null);
   const [entryToDelete, setEntryToDelete] = useState<ProjectTimeEntry | null>(null);
@@ -58,9 +59,6 @@ export const ProjectHours = () => {
 
   const canModify = (entry: ProjectTimeEntry) => isAdmin || entry.userId === userStore?.id;
   const canInput = isAdmin || isMember;
-
-  const showToast = (message: string, type: "success" | "error" = "error") =>
-    setToast({ message, type });
 
   const refreshEntries = async () => {
     if (!id) return;
@@ -174,7 +172,7 @@ export const ProjectHours = () => {
   return (
     <section className="project-hours">
       {toast && (
-        <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
+        <Toast message={toast.message} type={toast.type} onClose={closeToast} />
       )}
 
       {entryToDelete && (

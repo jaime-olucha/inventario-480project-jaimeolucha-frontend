@@ -10,6 +10,7 @@ import type { Contact } from "@/domain/models/Client/Contact";
 import type { EntityId } from "@/domain/value-objects/EntityId";
 import { ConfirmModal } from "@/ui/components/organisms/confirmModal/ConfirmModal";
 import { ActionButton } from "@/ui/components/atoms/actionButton/ActionButton";
+import { useModal } from "@/ui/hooks/useModal";
 import "@/ui/components/organisms/confirmModal/ConfirmModal.scss";
 import "./ContactDetail.scss";
 
@@ -40,10 +41,10 @@ const EMPTY_CONTACT_FORM: ContactForm = {
 export const ContactDetail = ({ clientId, isAdmin, onToast }: ContactDetailProps) => {
   const { contact: contactRepo } = useRepositories();
   const [contacts, setContacts] = useState<Contact[]>([]);
-  const [isContactsOpen, setIsContactsOpen] = useState(false);
+  const { isOpen: isContactsOpen, toggle: toggleContacts } = useModal();
   const [activeNoteContactId, setActiveNoteContactId] = useState<EntityId | null>(null);
   const [editingContactId, setEditingContactId] = useState<EntityId | null>(null);
-  const [isContactFormOpen, setIsContactFormOpen] = useState(false);
+  const { isOpen: isContactFormOpen, open: openContactForm, close: closeContactForm } = useModal();
   const [loadingContact, setLoadingContact] = useState(false);
   const [contactToDelete, setContactToDelete] = useState<Contact | null>(null);
   const [mainContactToReplace, setMainContactToReplace] = useState<{ data: ContactForm; id: EntityId | null } | null>(null);
@@ -76,7 +77,7 @@ export const ContactDetail = ({ clientId, isAdmin, onToast }: ContactDetailProps
 
   const resetContactForm = () => {
     setEditingContactId(null);
-    setIsContactFormOpen(false);
+    closeContactForm();
     reset(EMPTY_CONTACT_FORM);
   };
 
@@ -84,7 +85,7 @@ export const ContactDetail = ({ clientId, isAdmin, onToast }: ContactDetailProps
     setEditingContactId(null);
     reset(EMPTY_CONTACT_FORM);
     setActiveNoteContactId(null);
-    setIsContactFormOpen(true);
+    openContactForm();
   };
 
   const handleEditContactClick = (contact: Contact) => {
@@ -97,7 +98,7 @@ export const ContactDetail = ({ clientId, isAdmin, onToast }: ContactDetailProps
       note: contact.note ?? "",
     });
     setActiveNoteContactId(null);
-    setIsContactFormOpen(true);
+    openContactForm();
   };
 
   const refreshContacts = async () => {
@@ -205,7 +206,7 @@ export const ContactDetail = ({ clientId, isAdmin, onToast }: ContactDetailProps
         type="button"
         className="contacts-toggle"
         onClick={() => {
-          setIsContactsOpen((value) => !value);
+          toggleContacts();
           setActiveNoteContactId(null);
         }}
         aria-expanded={isContactsOpen}
