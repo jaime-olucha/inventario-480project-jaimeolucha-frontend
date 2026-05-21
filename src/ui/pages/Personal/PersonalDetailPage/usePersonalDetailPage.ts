@@ -87,7 +87,7 @@ export function usePersonalDetailPage() {
     try {
       await userRepo.putUser(id, editData);
       if (emailChanged) {
-        sessionStorage.setItem("sessionMessage", "Tu correo ha sido actualizado. Por favor, inicia sesión de nuevo.");
+        sessionStorage.setItem("sessionMessage", JSON.stringify({ message: "Tu correo ha sido actualizado. Por favor, inicia sesión de nuevo.", type: "success" }));
         logout();
         return;
       }
@@ -117,7 +117,7 @@ export function usePersonalDetailPage() {
     if (!id) return;
     try {
       await userRepo.patchPassword(id, data);
-      sessionStorage.setItem("sessionMessage", "Tu contraseña ha sido actualizada. Por favor, inicia sesión de nuevo.");
+      sessionStorage.setItem("sessionMessage", JSON.stringify({ message: "Tu contraseña ha sido actualizada. Por favor, inicia sesión de nuevo.", type: "success" }));
       logout();
     } catch (err) {
       showToast(getErrorMessage(err, "No se pudo cambiar la contraseña."));

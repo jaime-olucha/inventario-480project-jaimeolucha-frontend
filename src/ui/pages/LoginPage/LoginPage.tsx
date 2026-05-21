@@ -13,10 +13,11 @@ import './LoginPage.scss';
 export const LoginPage = () => {
   const setTokens = useAuthStore((state) => state.setTokens);
   const { auth } = useRepositories();
-  const [sessionMessage] = useState(() => {
-    const msg = sessionStorage.getItem('sessionMessage');
+  const [sessionMessage] = useState<{ message: string; type: "success" | "error" } | null>(() => {
+    const raw = sessionStorage.getItem('sessionMessage');
     sessionStorage.removeItem('sessionMessage');
-    return msg;
+    if (!raw) return null;
+    try { return JSON.parse(raw); } catch { return null; }
   });
   const [errorToast, setErrorToast] = useState<string | null>(null);
 
@@ -43,7 +44,7 @@ export const LoginPage = () => {
       </div>
 
       {sessionMessage && (
-        <Toast message={sessionMessage} type="success" onClose={() => { }} />
+        <Toast message={sessionMessage.message} type={sessionMessage.type} onClose={() => { }} />
       )}
       {errorToast && (
         <Toast message={errorToast} type="error" onClose={() => setErrorToast(null)} />

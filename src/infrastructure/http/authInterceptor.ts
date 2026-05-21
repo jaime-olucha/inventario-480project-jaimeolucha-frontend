@@ -60,6 +60,10 @@ export function setupAuthInterceptor(axiosInstance: AxiosInstance): void {
 
         } catch (refreshError) {
           processQueue(refreshError, null);
+          sessionStorage.setItem("sessionMessage", JSON.stringify({
+            message: "Tu sesión ha sido cerrada. Ponte en contacto con el administrador.",
+            type: "error",
+          }));
           useAuthStore.getState().logout();
           return Promise.reject(refreshError);
 
