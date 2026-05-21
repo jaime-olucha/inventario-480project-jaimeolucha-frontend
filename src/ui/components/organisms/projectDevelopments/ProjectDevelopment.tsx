@@ -1,20 +1,12 @@
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { Check, Code2, ExternalLink, GitBranch, LayersIcon, Pencil, Plus, Settings, ShieldAlert, Trash2, X } from "lucide-react";
-import { useRepositories } from "@/infrastructure/RepositoryContext/RepositoryContext";
-import { getErrorMessage } from "@/infrastructure/helpers/getErrorMessage";
 import { ActionButton } from "@/ui/components/atoms/actionButton/ActionButton";
 import { ConfirmModal } from "@/ui/components/organisms/confirmModal/ConfirmModal";
 import { Toast } from "@/ui/components/molecules/toast/Toast";
 import { MenuOptions } from "@/ui/components/organisms/menuOptions/MenuOptions";
 import { ManageTechnologiesModal } from "./ManageTechnologiesModal";
-import type { Development } from "@/domain/models/Project/Development";
-import type { Technology } from "@/domain/models/Project/Technology";
+import { useProjectDevelopment } from "./useProjectDevelopment";
+import type { DevForm } from "./useProjectDevelopment";
 import type { Environment } from "@/domain/value-objects/Environment";
-import type { EntityId } from "@/domain/value-objects/EntityId";
 import "@/ui/components/organisms/confirmModal/ConfirmModal.scss";
 import "./ProjectDevelopment.scss";
 
@@ -32,150 +24,21 @@ const ENV_CLASS: Record<Environment, string> = {
   STAGE: "env-badge--stage",
 };
 
-const devSchema = z.object({
-  name: z.string().min(1, "El nombre es obligatorio"),
-  description: z.string().optional(),
-  technologyId: z.string().min(1, "Selecciona una tecnología"),
-  urlRepository: z.string().url("Introduce una URL válida").or(z.literal("")),
-  productionUrl: z.string().url("URL inválida").or(z.literal("")).optional(),
-  preproductionUrl: z.string().url("URL inválida").or(z.literal("")).optional(),
-  stageUrl: z.string().url("URL inválida").or(z.literal("")).optional(),
-});
-
-type DevForm = z.infer<typeof devSchema>;
-
-const EMPTY_FORM: DevForm = {
-  name: "",
-  description: "",
-  technologyId: "" as EntityId,
-  urlRepository: "",
-  productionUrl: "",
-  preproductionUrl: "",
-  stageUrl: "",
-};
-
 interface ProjectDevelopmentProps {
   canEdit?: boolean;
 }
 
 export const ProjectDevelopment = ({ canEdit = false }: ProjectDevelopmentProps) => {
-  const { id } = useParams<{ id: EntityId }>();
-  const { project: projectRepo, technology: technologyRepo } = useRepositories();
-
-  const [developments, setDevelopments] = useState<Development[]>([]);
-  const [technologies, setTechnologies] = useState<Technology[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
-  const [showForm, setShowForm] = useState(false);
-  const [editingDev, setEditingDev] = useState<Development | null>(null);
-  const [devToDelete, setDevToDelete] = useState<Development | null>(null);
-  const [showTechModal, setShowTechModal] = useState(false);
-
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<DevForm>({
-    resolver: zodResolver(devSchema),
-    defaultValues: EMPTY_FORM,
-  });
-
-  const showToast = (message: string, type: "success" | "error" = "error") =>
-    setToast({ message, type });
-
-  const fetchAll = async () => {
-    if (!id) return;
-    const [devs, techs] = await Promise.all([
-      projectRepo.getDevelopments(id),
-      technologyRepo.getAll(),
-    ]);
-    setDevelopments(devs);
-    setTechnologies(techs);
-  };
-
-  useEffect(() => {
-    if (!id) return;
-    setLoading(true);
-    fetchAll()
-      .catch(() => setError("No se pudieron cargar los desarrollos del proyecto."))
-      .finally(() => setLoading(false));
-  }, [id]);
-
-  const openAddForm = () => {
-    reset(EMPTY_FORM);
-    setEditingDev(null);
-    setShowForm(true);
-  };
-
-  const openEditForm = (dev: Development) => {
-    const linksByEnv = Object.fromEntries(dev.links.map((l) => [l.environment, l.url]));
-    reset({
-      name: dev.name,
-      description: dev.description ?? "",
-      technologyId: dev.technology.id,
-      urlRepository: dev.urlRepository ?? "",
-      productionUrl: linksByEnv["PRODUCTION"] ?? "",
-      preproductionUrl: linksByEnv["PREPRODUCTION"] ?? "",
-      stageUrl: linksByEnv["STAGE"] ?? "",
-    });
-    setEditingDev(dev);
-    setShowForm(true);
-  };
-
-  const closeForm = () => {
-    setShowForm(false);
-    setEditingDev(null);
-    reset(EMPTY_FORM);
-  };
-
-  const handleSubmitForm = handleSubmit(async (data) => {
-    if (!id) return;
-    setSaving(true);
-    try {
-      if (editingDev) {
-        const links: { environment: Environment; url: string }[] = [];
-        if (data.productionUrl) links.push({ environment: "PRODUCTION", url: data.productionUrl });
-        if (data.preproductionUrl) links.push({ environment: "PREPRODUCTION", url: data.preproductionUrl });
-        if (data.stageUrl) links.push({ environment: "STAGE", url: data.stageUrl });
-
-        await projectRepo.updateDevelopment(id, editingDev.id, {
-          name: data.name,
-          description: data.description,
-          technologyId: data.technologyId,
-          urlRepository: data.urlRepository,
-          links,
-        });
-        showToast("Desarrollo actualizado correctamente.", "success");
-      } else {
-        await projectRepo.createDevelopment(id, {
-          name: data.name,
-          description: data.description,
-          technologyId: data.technologyId,
-          urlRepository: data.urlRepository,
-        });
-        showToast("Desarrollo creado correctamente.", "success");
-      }
-      await fetchAll();
-      closeForm();
-    } catch (err) {
-      showToast(getErrorMessage(err, "No se pudo guardar el desarrollo."));
-    } finally {
-      setSaving(false);
-    }
-  });
-
-  const handleDelete = async () => {
-    if (!id || !devToDelete) return;
-    setSaving(true);
-    try {
-      await projectRepo.deleteDevelopment(id, devToDelete.id);
-      setDevToDelete(null);
-      await fetchAll();
-      showToast("Desarrollo eliminado correctamente.", "success");
-    } catch (err) {
-      showToast(getErrorMessage(err, "No se pudo eliminar el desarrollo."));
-    } finally {
-      setSaving(false);
-    }
-  };
+  const {
+    developments, technologies, refreshTechnologies,
+    loading, saving, error,
+    toast, showToast, closeToast,
+    showForm, editingDev,
+    register, errors,
+    openAddForm, openEditForm, closeForm, handleSubmitForm,
+    devToDelete, setDevToDelete, handleDelete,
+    showTechModal, openTechModal, closeTechModal,
+  } = useProjectDevelopment();
 
   if (loading) {
     return (
@@ -205,7 +68,7 @@ export const ProjectDevelopment = ({ canEdit = false }: ProjectDevelopmentProps)
 
   return (
     <section className="project-development">
-      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
 
       {devToDelete && (
         <ConfirmModal
@@ -220,8 +83,8 @@ export const ProjectDevelopment = ({ canEdit = false }: ProjectDevelopmentProps)
 
       {showTechModal && (
         <ManageTechnologiesModal
-          onClose={() => setShowTechModal(false)}
-          onChanged={() => technologyRepo.getAll().then(setTechnologies)}
+          onClose={closeTechModal}
+          onChanged={refreshTechnologies}
           onSuccess={(msg) => showToast(msg, "success")}
         />
       )}
@@ -234,7 +97,7 @@ export const ProjectDevelopment = ({ canEdit = false }: ProjectDevelopmentProps)
           </div>
           {canEdit && (
             <div className="header-actions">
-              <button type="button" className="btn-secondary" onClick={() => setShowTechModal(true)} disabled={saving}>
+              <button type="button" className="btn-secondary" onClick={openTechModal} disabled={saving}>
                 <Settings size={15} /> Tecnologías
               </button>
               <ActionButton icon={<Plus size={16} />} onClick={openAddForm} disabled={saving || showForm}>
