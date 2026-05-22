@@ -1,5 +1,5 @@
 import { Navigate } from "react-router-dom";
-import { useUserStore } from "../../infrastructure/store/user.store";
+import { useUserStore } from "@/infrastructure/store/user.store";
 import type { SystemRole } from "@/domain/value-objects/SystemRole";
 import { ROUTES } from "./routes";
 
