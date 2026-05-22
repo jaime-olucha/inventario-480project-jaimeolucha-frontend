@@ -5,8 +5,8 @@ import { ProjectsCounter } from "@/ui/components/molecules/projectsCounter/Proje
 import { CreatePersonalModal } from "./CreatePersonalModal";
 import { FiltersCard } from "@/ui/components/organisms/filtersCard/FiltersCard";
 import { FilterSelect } from "@/ui/components/organisms/filterSelect/FilterSelect";
-import { usePersonalFilters, ROLE_OPTIONS } from "../../../hooks/usePersonalFilters";
-import { PaginationControls } from "../../../components/molecules/paginationControls/PaginationControls";
+import { usePersonalFilters, ROLE_OPTIONS } from "@/ui/hooks/usePersonalFilters";
+import { PaginationControls } from "@/ui/components/molecules/paginationControls/PaginationControls";
 import './PersonalPage.scss';
 import { LogoUser } from "@/ui/components/atoms/logoUser/LogoUser";
 import { StatusBadge } from "@/ui/components/atoms/statusBadge/StatusBadge";

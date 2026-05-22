@@ -1,58 +1,23 @@
-﻿import { Link } from "react-router-dom";
-import { useRepositories } from "@/infrastructure/RepositoryContext/RepositoryContext";
-import { useUserStore } from "@/infrastructure/store/user.store";
+import { Link } from "react-router-dom";
 import { FolderPlus, User as UserIcon } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useFab } from "@/ui/hooks/useFab";
 import { CreateProjectModal } from "./CreateProjectModal";
 import { FiltersCard } from "@/ui/components/organisms/filtersCard/FiltersCard";
-import { usePagination } from "../../../hooks/usePagination";
-import { PaginationControls } from "../../../components/molecules/paginationControls/PaginationControls";
-import './ProjectPage.scss';
-import { ROUTES } from "@/ui/routes/routes";
-import { useFilters } from "@/ui/hooks/useFilters";
-import type { CreateProjectRequest } from "@/domain/models/Project/CreateProjectRequest";
-import { SYSTEM_ROLES } from "@/domain/value-objects/SystemRole";
+import { PaginationControls } from "@/ui/components/molecules/paginationControls/PaginationControls";
 import { StatusBadge } from "@/ui/components/atoms/statusBadge/StatusBadge";
 import { ActionButton } from "@/ui/components/atoms/actionButton/ActionButton";
-import type { UserProject } from "@/domain/models/User/UserProject";
-import { useModal } from "@/ui/hooks/useModal";
-
-const PAGE_LIMIT = 20;
+import { ROUTES } from "@/ui/routes/routes";
+import { useProjectPage } from "./useProjectPage";
+import "./ProjectPage.scss";
 
 export const ProjectPage = () => {
-  const userStore = useUserStore((store) => store.user);
-  const { project: projectRepo, user: userRepo } = useRepositories();
-  const [projects, setProjects] = useState<UserProject[]>([]);
-  const { isOpen: isModalOpen, open: openModal, close: closeModal } = useModal();
-  const { page, limit, isFirst, isLast, setIsLast, goNext, goPrev } = usePagination(PAGE_LIMIT);
-  const isAdmin = userStore?.role === SYSTEM_ROLES.ADMIN;
-  const { search, setSearch, status, setStatus, filtered } = useFilters(projects);
-
-  useEffect(() => {
-    if (!userStore) return;
-
-    if (isAdmin) {
-      projectRepo.getAll(page, limit).then(result => {
-        setProjects(result);
-        setIsLast(result.length < limit);
-      });
-    } else {
-      userRepo.getProjects(userStore.id).then(result => {
-        setProjects(result);
-        setIsLast(result.length < limit);
-      });
-    }
-  }, [userStore, projectRepo, userRepo, page, limit]);
-
-  const { btnRef, showFab } = useFab();
-
-  const handleCreateProject = async (data: CreateProjectRequest) => {
-    await projectRepo.createProject(data);
-    const result = await projectRepo.getAll(page, limit);
-    setProjects(result);
-    setIsLast(result.length < limit);
-  };
+  const {
+    projects, filtered, isAdmin,
+    isModalOpen, openModal, closeModal,
+    page, isFirst, isLast, goNext, goPrev,
+    search, setSearch, status, setStatus,
+    btnRef, showFab,
+    handleCreateProject,
+  } = useProjectPage();
 
   return (
     <section className="section-page">
@@ -62,7 +27,7 @@ export const ProjectPage = () => {
           <p className="info">Todos los proyectos de la empresa</p>
         </div>
 
-        {userStore?.role === SYSTEM_ROLES.ADMIN && (
+        {isAdmin && (
           <ActionButton ref={btnRef} compact icon={<FolderPlus size={20} />} onClick={openModal}>
             Nuevo Proyecto
           </ActionButton>
@@ -92,7 +57,7 @@ export const ProjectPage = () => {
         {filtered.map((project) => (
           <li className="li-map" key={project.id}>
             <Link to={ROUTES.PROJECTS.BY_ID(project.id)}>
-              <article className={`card card_project ${!project.isActive ? 'project_disabled' : ''}`}>
+              <article className={`card card_project ${!project.isActive ? "project_disabled" : ""}`}>
                 <div className="card-project_info">
                   <h2 className="card-project_label">
                     {project.name}
@@ -119,4 +84,3 @@ export const ProjectPage = () => {
     </section>
   );
 };
-

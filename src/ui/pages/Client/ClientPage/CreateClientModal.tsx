@@ -1,25 +1,12 @@
-import { useEffect, useState } from "react";
-import { useForm, Controller } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { X, Building2, ListTree } from "lucide-react";
-import { useRepositories } from "@/infrastructure/RepositoryContext/RepositoryContext";
+import { Controller } from "react-hook-form";
 import { FilterSelect } from "@/ui/components/organisms/filterSelect/FilterSelect";
 import { Toast } from "@/ui/components/molecules/toast/Toast";
 import { ManageSectorsModal } from "./ManageSectorsModal";
 import { ActionButton } from "@/ui/components/atoms/actionButton/ActionButton";
-import type { Sector } from "@/domain/models/Client/Sector";
+import { useCreateClientModal } from "./useCreateClientModal";
 import type { CreateClientRequest } from "@/domain/models/Client/CreateClientRequest";
 import "./CreateClientModal.scss";
-import { useToast } from "@/ui/hooks/useToast";
-import { useModal } from "@/ui/hooks/useModal";
-
-const schema = z.object({
-  name: z.string().min(1, "El nombre es obligatorio"),
-  sectorId: z.string().min(1, "El sector es obligatorio"),
-});
-
-type FormValues = z.infer<typeof schema>;
 
 interface Props {
   onClose: () => void;
@@ -27,44 +14,19 @@ interface Props {
 }
 
 export const CreateClientModal = ({ onClose, onSubmit }: Props) => {
-  const { sector: sectorRepo } = useRepositories();
-  const [sectors, setSectors] = useState<Sector[]>([]);
-  const [serverError, setServerError] = useState<string | null>(null);
-  const { toast, showToast, closeToast } = useToast();
-  const { isOpen: isManageSectorsOpen, open: openManageSectors, close: closeManageSectors } = useModal();
+  const {
+    serverError, sectorOptions, form,
+    isManageSectorsOpen, openManageSectors, closeManageSectors,
+    toast, showToast, closeToast,
+    refreshSectors, handleCreate,
+  } = useCreateClientModal({ onSubmit, onClose });
 
-  const { register, handleSubmit, control, formState: { errors, isSubmitting } } = useForm<FormValues>({
-    resolver: zodResolver(schema),
-  });
-
-  const fetchSectors = () => {
-    sectorRepo.getAll().then(setSectors);
-  };
-
-  useEffect(() => {
-    fetchSectors();
-  }, [sectorRepo]);
-
-  const handleCreate = async (data: FormValues) => {
-    setServerError(null);
-    try {
-      await onSubmit({ name: data.name, sectorId: data.sectorId });
-      onClose();
-    } catch (error) {
-      if (error instanceof Error && error.message.includes('409')) {
-        setServerError('Ya existe un cliente con este nombre.');
-      } else {
-        setServerError('Error al crear el cliente. Inténtalo de nuevo.');
-      }
-    }
-  };
-
-  const sectorOptions = sectors.map(s => ({ value: String(s.id), label: s.name }));
+  const { register, handleSubmit: _, control, formState: { errors, isSubmitting } } = form;
 
   return (
     <div className="modal-overlay" onClick={onClose}>
       {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
-      <div className="modal" onClick={event => event.stopPropagation()}>
+      <div className="modal" onClick={(event) => event.stopPropagation()}>
         <div className="modal_header">
           <h2><Building2 className="iconHeader" /> Nuevo Cliente</h2>
           <button type="button" className="modal_close" onClick={onClose}><X size={20} /></button>
@@ -73,12 +35,12 @@ export const CreateClientModal = ({ onClose, onSubmit }: Props) => {
         {isManageSectorsOpen && (
           <ManageSectorsModal
             onClose={closeManageSectors}
-            onSectorsChanged={fetchSectors}
+            onSectorsChanged={refreshSectors}
             onSuccess={(msg) => showToast(msg, "success")}
           />
         )}
 
-        <form className="modal_form" onSubmit={handleSubmit(handleCreate)}>
+        <form className="modal_form" onSubmit={handleCreate}>
           {serverError && <p className="form_server_error">{serverError}</p>}
 
           <div className="form_field">
@@ -94,17 +56,13 @@ export const CreateClientModal = ({ onClose, onSubmit }: Props) => {
               <div className="form_field-with-action">
                 <div className="field-header">
                   <label>Sector</label>
-                  <button
-                    type="button"
-                    className="btn-inline-action"
-                    onClick={openManageSectors}
-                  >
+                  <button type="button" className="btn-inline-action" onClick={openManageSectors}>
                     <ListTree size={12} /> Gestionar Sectores
                   </button>
                 </div>
                 <FilterSelect
                   label=""
-                  value={field.value ?? ''}
+                  value={field.value ?? ""}
                   options={sectorOptions}
                   onChange={field.onChange}
                 />

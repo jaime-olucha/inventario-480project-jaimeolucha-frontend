@@ -1,28 +1,12 @@
-﻿import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { ChevronDown, Edit2, Mail, Phone, StickyNote, Trash2, UserPlus, Users } from "lucide-react";
-import { MenuOptions } from "@/ui/components/organisms/menuOptions/MenuOptions";
-import { getErrorMessage } from "@/infrastructure/helpers/getErrorMessage";
-import { useRepositories } from "@/infrastructure/RepositoryContext/RepositoryContext";
-import type { Contact } from "@/domain/models/Client/Contact";
-import type { EntityId } from "@/domain/value-objects/EntityId";
+import { ChevronDown, UserPlus } from "lucide-react";
 import { ConfirmModal } from "@/ui/components/organisms/confirmModal/ConfirmModal";
 import { ActionButton } from "@/ui/components/atoms/actionButton/ActionButton";
-import { useModal } from "@/ui/hooks/useModal";
+import { ContactFormPanel } from "./ContactFormPanel";
+import { ContactItem } from "./ContactItem";
+import { useContactDetail } from "./useContactDetail";
+import type { EntityId } from "@/domain/value-objects/EntityId";
 import "@/ui/components/organisms/confirmModal/ConfirmModal.scss";
 import "./ContactDetail.scss";
-
-const contactSchema = z.object({
-  fullName: z.string().min(1, "El nombre es obligatorio"),
-  phone: z.string().optional(),
-  email: z.string().min(1, "El email es obligatorio").email("Email no válido"),
-  isMain: z.boolean(),
-  note: z.string().optional(),
-});
-
-type ContactForm = z.infer<typeof contactSchema>;
 
 interface ContactDetailProps {
   clientId: EntityId;
@@ -30,160 +14,25 @@ interface ContactDetailProps {
   onToast: (message: string, type: "success" | "error") => void;
 }
 
-const EMPTY_CONTACT_FORM: ContactForm = {
-  fullName: "",
-  phone: "",
-  email: "",
-  isMain: false,
-  note: "",
-};
-
 export const ContactDetail = ({ clientId, isAdmin, onToast }: ContactDetailProps) => {
-  const { contact: contactRepo } = useRepositories();
-  const [contacts, setContacts] = useState<Contact[]>([]);
-  const { isOpen: isContactsOpen, toggle: toggleContacts } = useModal();
-  const [activeNoteContactId, setActiveNoteContactId] = useState<EntityId | null>(null);
-  const [editingContactId, setEditingContactId] = useState<EntityId | null>(null);
-  const { isOpen: isContactFormOpen, open: openContactForm, close: closeContactForm } = useModal();
-  const [loadingContact, setLoadingContact] = useState(false);
-  const [contactToDelete, setContactToDelete] = useState<Contact | null>(null);
-  const [mainContactToReplace, setMainContactToReplace] = useState<{ data: ContactForm; id: EntityId | null } | null>(null);
-
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<ContactForm>({
-    resolver: zodResolver(contactSchema),
-    defaultValues: EMPTY_CONTACT_FORM,
-  });
-
-  useEffect(() => {
-    contactRepo.getContacts(clientId).then(setContacts);
-  }, [clientId, contactRepo]);
-
-  useEffect(() => {
-    if (!activeNoteContactId) return;
-
-    const handleClickOutside = () => setActiveNoteContactId(null);
-    document.addEventListener("click", handleClickOutside);
-
-    return () => document.removeEventListener("click", handleClickOutside);
-  }, [activeNoteContactId]);
-
-  const sortedContacts = [...contacts].sort((a, b) => {
-    const aMain = a.isMain;
-    const bMain = b.isMain;
-    if (aMain && !bMain) return -1;
-    if (!aMain && bMain) return 1;
-    return 0;
-  });
-
-  const resetContactForm = () => {
-    setEditingContactId(null);
-    closeContactForm();
-    reset(EMPTY_CONTACT_FORM);
-  };
-
-  const handleCreateContactClick = () => {
-    setEditingContactId(null);
-    reset(EMPTY_CONTACT_FORM);
-    setActiveNoteContactId(null);
-    openContactForm();
-  };
-
-  const handleEditContactClick = (contact: Contact) => {
-    setEditingContactId(contact.id);
-    reset({
-      fullName: contact.fullName,
-      phone: contact.phone ?? "",
-      email: contact.email,
-      isMain: contact.isMain,
-      note: contact.note ?? "",
-    });
-    setActiveNoteContactId(null);
-    openContactForm();
-  };
-
-  const refreshContacts = async () => {
-    const nextContacts = await contactRepo.getContacts(clientId);
-    setContacts(nextContacts);
-  };
-
-  const saveContact = async (data: ContactForm, replaceMainContact = false) => {
-    setLoadingContact(true);
-
-    const contactData = {
-      ...data,
-      phone: data.phone || undefined,
-      note: data.note ?? "",
-    };
-
-    try {
-      const currentMainContact = contacts.find((contact) => contact.isMain && contact.id !== editingContactId);
-
-      if (contactData.isMain && currentMainContact && !replaceMainContact) {
-        setMainContactToReplace({ data, id: editingContactId });
-        return;
-      }
-
-      if (editingContactId) {
-        if (contactData.isMain && currentMainContact) {
-          await contactRepo.patchMainContact(clientId, { id: editingContactId, ...contactData });
-          await contactRepo.updateContact(clientId, { id: editingContactId, ...contactData });
-        } else {
-          await contactRepo.updateContact(clientId, { id: editingContactId, ...contactData });
-        }
-        onToast("Contacto actualizado correctamente", "success");
-      } else {
-        const newId = await contactRepo.createContact(clientId, contactData);
-        if (contactData.isMain) {
-          await contactRepo.patchMainContact(clientId, { id: newId, ...contactData });
-        }
-        onToast("Contacto creado correctamente", "success");
-      }
-
-      await refreshContacts();
-      resetContactForm();
-      setMainContactToReplace(null);
-    } catch (err) {
-      onToast(getErrorMessage(err, "No se pudo guardar el contacto."), "error");
-    } finally {
-      setLoadingContact(false);
-    }
-  };
-
-  const handleSaveContact = handleSubmit((data) => saveContact(data));
-
-  const handleConfirmReplaceMainContact = async () => {
-    if (!mainContactToReplace) return;
-    await saveContact(mainContactToReplace.data, true);
-  };
-
-  const handleConfirmDeleteContact = async () => {
-    if (!contactToDelete) return;
-    setLoadingContact(true);
-
-    try {
-      await contactRepo.deleteContact(clientId, contactToDelete.id);
-      setContacts((prev) => prev.filter((contact) => contact.id !== contactToDelete.id));
-      onToast("Contacto eliminado correctamente", "success");
-      if (editingContactId === contactToDelete.id) resetContactForm();
-    } catch (err) {
-      onToast(getErrorMessage(err, "No se pudo eliminar el contacto."), "error");
-    } finally {
-      setLoadingContact(false);
-      setContactToDelete(null);
-    }
-  };
-
-  const handleNoteClick = (event: React.MouseEvent<HTMLButtonElement>, contactId: EntityId) => {
-    event.stopPropagation();
-    setActiveNoteContactId((current) => current === contactId ? null : contactId);
-  };
+  const {
+    contacts, sortedContacts, loadingContact,
+    activeNoteContactId, editingContactId,
+    contactToDelete, mainContactToReplace,
+    isContactsOpen, isContactFormOpen,
+    form,
+    handleToggleContacts, handleCreateContactClick, handleEditContactClick,
+    handleSaveContact, handleConfirmReplaceMainContact, handleConfirmDeleteContact,
+    handleNoteClick, setContactToDelete, setMainContactToReplace,
+    resetContactForm,
+  } = useContactDetail({ clientId, onToast });
 
   return (
     <div className={`contact-detail ${isContactsOpen ? "is-open" : ""}`}>
       {mainContactToReplace && (
         <ConfirmModal
           title="Cambiar contacto principal"
-          message={`Ya existe un contacto principal. Si continúas, se quitará como principal y este contacto pasará a ser el principal.`}
+          message="Ya existe un contacto principal. Si continúas, se quitará como principal y este contacto pasará a ser el principal."
           confirmLabel="Continuar"
           loading={loadingContact}
           onConfirm={handleConfirmReplaceMainContact}
@@ -205,10 +54,7 @@ export const ContactDetail = ({ clientId, isAdmin, onToast }: ContactDetailProps
       <button
         type="button"
         className="contacts-toggle"
-        onClick={() => {
-          toggleContacts();
-          setActiveNoteContactId(null);
-        }}
+        onClick={handleToggleContacts}
         aria-expanded={isContactsOpen}
       >
         <div>
@@ -229,41 +75,13 @@ export const ContactDetail = ({ clientId, isAdmin, onToast }: ContactDetailProps
           )}
 
           {isAdmin && isContactFormOpen && (
-            <form className="contact-form" onSubmit={handleSaveContact}>
-              <div className="contact-form_grid">
-                <div className="form-group">
-                  <label htmlFor="contactFullName">Nombre</label>
-                  <input id="contactFullName" className={`edit-input ${errors.fullName ? "edit-input--error" : ""}`} {...register("fullName")} />
-                  {errors.fullName && <span className="field-error">{errors.fullName.message}</span>}
-                </div>
-                <div className="form-group">
-                  <label htmlFor="contactPhone">Teléfono</label>
-                  <input id="contactPhone" className="edit-input" {...register("phone")} />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="contactEmail">Email</label>
-                  <input id="contactEmail" type="email" className={`edit-input ${errors.email ? "edit-input--error" : ""}`} {...register("email")} />
-                  {errors.email && <span className="field-error">{errors.email.message}</span>}
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="contactNote">Nota</label>
-                <textarea id="contactNote" className="edit-input contact-textarea" {...register("note")} />
-              </div>
-
-              <div className="contact-form_footer">
-                <label className="contact-checkbox">
-                  <input type="checkbox" {...register("isMain")} />
-                  Contacto principal
-                </label>
-
-                <div className="contact-form_actions">
-                  <button type="button" className="btn-cancel-contact" onClick={resetContactForm} disabled={loadingContact}>Cancelar</button>
-                  <ActionButton type="submit" compact disabled={loadingContact}>{loadingContact ? "Guardando..." : editingContactId ? "Guardar cambios" : "Crear contacto"}</ActionButton>
-                </div>
-              </div>
-            </form>
+            <ContactFormPanel
+              form={form}
+              editingContactId={editingContactId}
+              loadingContact={loadingContact}
+              onSave={handleSaveContact}
+              onCancel={resetContactForm}
+            />
           )}
 
           {sortedContacts.length === 0 ? (
@@ -271,69 +89,16 @@ export const ContactDetail = ({ clientId, isAdmin, onToast }: ContactDetailProps
           ) : (
             <ul className="contacts-list">
               {sortedContacts.map((contact) => (
-                <li key={contact.id} className="contact-item">
-                  <div className="contact-item_main">
-                    <div className="contact-field contact-name">
-                      <Users size={16} className="field-icon" />
-                      <span className="field-value">
-                        {contact.fullName}
-                        {contact.isMain && (
-                          <span className="main-badge">Principal</span>
-                        )}
-                      </span>
-                    </div>
-
-                    <div className="contact-field">
-                      <Phone size={16} className="field-icon" />
-                      <span className="field-value">{contact.phone || "No disponible"}</span>
-                    </div>
-
-                    <div className="contact-field">
-                      <Mail size={16} className="field-icon" />
-                      <span className="field-value">{contact.email}</span>
-                    </div>
-                  </div>
-
-                  <div className="contact-item_actions">
-                    <div className="contact-note">
-                      <button
-                        className={`btn-note ${activeNoteContactId === contact.id ? "active" : ""}`}
-                        onClick={(event) => handleNoteClick(event, contact.id)}
-                        disabled={!contact.note}
-                      >
-                        <StickyNote size={14} /> Ver nota
-                      </button>
-
-                      {activeNoteContactId === contact.id && contact.note && (
-                        <div className="note-bubble" onClick={(event) => event.stopPropagation()}>
-                          <div className="bubble-content">
-                            {contact.note}
-                          </div>
-                          <div className="bubble-arrow"></div>
-                        </div>
-                      )}
-                    </div>
-
-                    {isAdmin && (
-                      <MenuOptions
-                        disabled={loadingContact}
-                        items={[
-                          {
-                            label: "Editar",
-                            icon: <Edit2 size={14} />,
-                            onClick: () => handleEditContactClick(contact),
-                          },
-                          {
-                            label: "Eliminar",
-                            icon: <Trash2 size={14} />,
-                            variant: "danger",
-                            onClick: () => setContactToDelete(contact),
-                          },
-                        ]}
-                      />
-                    )}
-                  </div>
-                </li>
+                <ContactItem
+                  key={contact.id}
+                  contact={contact}
+                  isAdmin={isAdmin}
+                  loadingContact={loadingContact}
+                  activeNoteContactId={activeNoteContactId}
+                  onNoteClick={handleNoteClick}
+                  onEditClick={handleEditContactClick}
+                  onDeleteClick={setContactToDelete}
+                />
               ))}
             </ul>
           )}
@@ -342,6 +107,3 @@ export const ContactDetail = ({ clientId, isAdmin, onToast }: ContactDetailProps
     </div>
   );
 };
-
-
-

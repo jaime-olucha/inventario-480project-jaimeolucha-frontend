@@ -27,7 +27,7 @@ export type DevForm = z.infer<typeof devSchema>;
 export const EMPTY_FORM: DevForm = {
   name: "",
   description: "",
-  technologyId: "" as EntityId,
+  technologyId: "",
   urlRepository: "",
   productionUrl: "",
   preproductionUrl: "",

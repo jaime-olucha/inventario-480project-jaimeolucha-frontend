@@ -51,9 +51,6 @@ export function setupAuthInterceptor(axiosInstance: AxiosInstance): void {
 
           useAuthStore.getState().setTokens(data.token, data.refresh_token);
 
-          console.log('Token refrescado correctamente');
-
-
           processQueue(null, data.token);
           originalRequest.headers.Authorization = `Bearer ${data.token}`;
           return axiosInstance(originalRequest);

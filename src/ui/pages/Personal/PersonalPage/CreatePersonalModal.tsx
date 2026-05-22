@@ -3,6 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { X, UserPlus } from "lucide-react";
 import { SYSTEM_ROLES } from "@/domain/value-objects/SystemRole";
+import { getErrorMessage } from "@/infrastructure/helpers/getErrorMessage";
 import type { CreateUserRequest } from "@/domain/models/User/CreateUserRequest";
 import { ActionButton } from "@/ui/components/atoms/actionButton/ActionButton";
 import "./CreatePersonalModal.scss";
@@ -49,8 +50,11 @@ export const CreatePersonalModal = ({ onClose, onSubmit, existingEmails }: Props
       await onSubmit(data);
       onClose();
 
-    } catch {
-      setError("email", { message: "Este email ya está en uso" });
+    } catch (error) {
+      const message = error instanceof Error && error.message.includes("409")
+        ? "Este email ya está en uso"
+        : getErrorMessage(error, "No se pudo crear el usuario. Inténtalo de nuevo.");
+      setError("email", { message });
     }
   };
 

@@ -1,15 +1,9 @@
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
 import { AlertCircle, Edit2, Loader2, Plus, Save, Settings, Trash2, X } from "lucide-react";
-import { useRepositories } from "@/infrastructure/RepositoryContext/RepositoryContext";
-import { getErrorMessage } from "@/infrastructure/helpers/getErrorMessage";
 import { Toast } from "@/ui/components/molecules/toast/Toast";
 import { ConfirmModal } from "@/ui/components/organisms/confirmModal/ConfirmModal";
-import type { Technology } from "@/domain/models/Project/Technology";
-import type { EntityId } from "@/domain/value-objects/EntityId";
+import { useManageTechnologiesModal } from "./useManageTechnologiesModal";
 import "@/ui/components/organisms/confirmModal/ConfirmModal.scss";
 import "./ManageTechnologiesModal.scss";
-import { useToast } from "@/ui/hooks/useToast";
 
 interface ManageTechnologiesModalProps {
   onClose: () => void;
@@ -18,80 +12,13 @@ interface ManageTechnologiesModalProps {
 }
 
 export const ManageTechnologiesModal = ({ onClose, onChanged, onSuccess }: ManageTechnologiesModalProps) => {
-  const { technology: technologyRepo } = useRepositories();
-
-  const [technologies, setTechnologies] = useState<Technology[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [actionLoading, setActionLoading] = useState(false);
-  const [editingId, setEditingId] = useState<EntityId | null>(null);
-  const { toast, showToast, closeToast } = useToast();
-  const [techToDelete, setTechToDelete] = useState<Technology | null>(null);
-
-  const addForm = useForm<{ name: string }>({ defaultValues: { name: "" } });
-  const editForm = useForm<{ name: string }>({ defaultValues: { name: "" } });
-
-  const fetchTechnologies = async () => {
-    setLoading(true);
-    try {
-      const data = await technologyRepo.getAll();
-      setTechnologies(data);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => { fetchTechnologies(); }, []);
-
-  const handleCreate = addForm.handleSubmit(async ({ name }) => {
-    setActionLoading(true);
-    try {
-      await technologyRepo.create(name.trim());
-      addForm.reset({ name: "" });
-      await fetchTechnologies();
-      onChanged();
-      onSuccess?.("Tecnología creada correctamente.");
-    } catch (error) {
-      showToast(getErrorMessage(error, "No se pudo crear la tecnología."));
-    } finally {
-      setActionLoading(false);
-    }
-  });
-
-  const handleUpdate = (id: EntityId) => editForm.handleSubmit(async ({ name }) => {
-    setActionLoading(true);
-    try {
-      await technologyRepo.update(id, name.trim());
-      setEditingId(null);
-      await fetchTechnologies();
-      onChanged();
-      onSuccess?.("Tecnología actualizada correctamente.");
-    } catch (error) {
-      showToast(getErrorMessage(error, "No se pudo actualizar la tecnología."));
-    } finally {
-      setActionLoading(false);
-    }
-  })();
-
-  const handleConfirmDelete = async () => {
-    if (!techToDelete) return;
-    setActionLoading(true);
-    try {
-      await technologyRepo.delete(techToDelete.id);
-      setTechToDelete(null);
-      await fetchTechnologies();
-      onChanged();
-      onSuccess?.("Tecnología eliminada correctamente.");
-    } catch (error) {
-      showToast(getErrorMessage(error, "No se pudo eliminar la tecnología."));
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  const startEditing = (tech: Technology) => {
-    setEditingId(tech.id);
-    editForm.reset({ name: tech.name });
-  };
+  const {
+    technologies, loading, actionLoading, editingId, techToDelete,
+    addForm, editForm,
+    toast, closeToast,
+    setEditingId, setTechToDelete, startEditing,
+    handleCreate, handleUpdate, handleConfirmDelete,
+  } = useManageTechnologiesModal({ onChanged, onSuccess });
 
   return (
     <div className="modal-overlay" onClick={onClose}>

@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from "react";
 import { ListFilter, Search } from "lucide-react";
 import { FilterSelect } from "@/ui/components/organisms/filterSelect/FilterSelect";
 import { STATUS_OPTIONS } from "@/ui/hooks/useFilters";
+import { useFiltersCard } from "./useFiltersCard";
 import "./FiltersCard.scss";
 
 interface FiltersCardProps {
@@ -18,16 +18,6 @@ interface FiltersCardProps {
   headerAction?: React.ReactNode;
 }
 
-function getScrollParent(el: HTMLElement): HTMLElement {
-  let node = el.parentElement;
-  while (node) {
-    const { overflow, overflowY } = window.getComputedStyle(node);
-    if (/auto|scroll/.test(overflow + overflowY)) return node;
-    node = node.parentElement;
-  }
-  return document.documentElement;
-}
-
 export const FiltersCard = ({
   search,
   onSearchChange,
@@ -41,28 +31,12 @@ export const FiltersCard = ({
   extraFilters,
   headerAction,
 }: FiltersCardProps) => {
-  const cardRef = useRef<HTMLElement>(null);
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    if (!cardRef.current) return;
-    const parent = getScrollParent(cardRef.current);
-    let raf: number;
-    const handleScroll = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => setScrolled(parent.scrollTop > 80));
-    };
-    parent.addEventListener('scroll', handleScroll, { passive: true });
-    return () => {
-      parent.removeEventListener('scroll', handleScroll);
-      cancelAnimationFrame(raf);
-    };
-  }, []);
+  const { cardRef, scrolled } = useFiltersCard();
 
   return (
     <article
       ref={cardRef}
-      className={`filters-card${scrolled ? ' filters-card--scrolled' : ''}`}
+      className={`filters-card${scrolled ? " filters-card--scrolled" : ""}`}
     >
       <div className="filters-card__top">
         <h2 className="filters-card__header">
@@ -80,7 +54,7 @@ export const FiltersCard = ({
               type="text"
               placeholder={searchPlaceholder}
               value={search}
-              onChange={e => onSearchChange(e.target.value)}
+              onChange={(e) => onSearchChange(e.target.value)}
             />
           </div>
         </div>
@@ -93,7 +67,7 @@ export const FiltersCard = ({
         {extraFilters}
       </div>
       <p className="filters-card__results">
-        Mostrando {filteredCount} de {total} {entityLabel}{total !== 1 ? 's' : ''}
+        Mostrando {filteredCount} de {total} {entityLabel}{total !== 1 ? "s" : ""}
       </p>
     </article>
   );

@@ -1,18 +1,22 @@
 import { Link } from "react-router-dom";
 import { ROUTES } from "@/ui/routes/routes";
-import { CalendarDays, Clock, Mail, Plus, SquareArrowRightEnter, User } from 'lucide-react';
-import './DashboardPage.scss';
+import { CalendarDays, Clock, Mail, Plus, SquareArrowRightEnter, User } from "lucide-react";
 import { LogoUser } from "@/ui/components/atoms/logoUser/LogoUser";
-import { useDashboardPage } from "./useDashboardPage";
+import { Toast } from "@/ui/components/molecules/toast/Toast";
 import { SectionHeader } from "@/ui/components/molecules/sectionHeader/SectionHeader";
-
+import { useDashboardPage } from "./useDashboardPage";
+import "./DashboardPage.scss";
 
 export const DashboardPage = () => {
-
-  const { user: userStore, roleBadge, projects, weeklyHours, maxHours, totalHours, projectColorMap, errors, isSubmittingHours, handleSubmitHours, register } = useDashboardPage()
+  const {
+    user: userStore, roleBadge, projects, weeklyHours, maxHours, totalHours,
+    projectColorMap, errors, isSubmittingHours, handleSubmitHours, register,
+    toast, closeToast,
+  } = useDashboardPage();
 
   return (
     <section className="dashboard-page">
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
       <SectionHeader
         title={`¡Bienvenid@, ${userStore?.name}!`}
         description={`Gestiona tus proyectos y horas de trabajo`}

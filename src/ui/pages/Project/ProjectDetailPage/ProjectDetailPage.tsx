@@ -1,71 +1,27 @@
-import ProjectMenuBar, { type ProjectTab } from "@/ui/components/organisms/menuItem/ProjectMenuItem";
-import { useNavigate, useParams } from "react-router-dom";
-import { useRepositories } from "@/infrastructure/RepositoryContext/RepositoryContext";
-import { useEffect, useState } from "react";
-import { ROUTES } from "@/ui/routes/routes";
-import type { EntityId } from "@/domain/value-objects/EntityId";
 import { FolderX, Trash2, UserCheck } from "lucide-react";
 import { ConfirmModal } from "@/ui/components/organisms/confirmModal/ConfirmModal";
 import { Toast } from "@/ui/components/molecules/toast/Toast";
-import './ProjectDetailPage.scss';
-import '@/ui/components/organisms/confirmModal/ConfirmModal.scss';
-import { getErrorMessage } from "@/infrastructure/helpers/getErrorMessage";
-import type { ProjectDetail } from "@/domain/models/Project/ProjectDetail";
+import { DetailPageHeader } from "@/ui/components/molecules/detailPageHeader/DetailPageHeader";
 import { ProjectInfo } from "@/ui/components/organisms/projectInfo/ProjectInfo";
 import { ProjectTeam } from "@/ui/components/organisms/projectTeam/ProjectTeam";
 import { ProjectClients } from "@/ui/components/organisms/projectClients/ProjectClients";
 import { ProjectDevelopment } from "@/ui/components/organisms/projectDevelopments/ProjectDevelopment";
 import { ProjectHours } from "@/ui/components/organisms/projectHours/ProjectHours";
-import { useToast } from "@/ui/hooks/useToast";
-import { useEntityActions } from "@/ui/hooks/useEntityActions";
-import { DetailPageHeader } from "@/ui/components/molecules/detailPageHeader/DetailPageHeader";
+import ProjectMenuBar from "@/ui/components/organisms/menuItem/ProjectMenuItem";
+import { useProjectDetailPage } from "./useProjectDetailPage";
+import "./ProjectDetailPage.scss";
+import "@/ui/components/organisms/confirmModal/ConfirmModal.scss";
 
 export const ProjectDetailPage = () => {
-
-  const { id } = useParams<{ id: EntityId }>();
-  const navigate = useNavigate();
-  const { project: projectRepo } = useRepositories();
-  const [targetProject, setTargetProject] = useState<ProjectDetail>();
-  const { toast, showToast, closeToast } = useToast();
   const {
-    modalActive,
-    loadingPatch,
-    openModal,
-    closeModal,
-    handleDelete,
-    handleToggleActive,
-
-  } = useEntityActions({
-    entityId: id,
-    isActive: targetProject?.isActive,
-    patchActive: (projectId, nextValue) => projectRepo.patchActive(projectId, nextValue),
-    deleteEntity: (projectId) => projectRepo.deleteProject(projectId),
-    onActiveChanged: (nextValue) => {
-      setTargetProject((prev) => prev ? { ...prev, isActive: nextValue } : prev);
-    },
-
-    onDeleted: () => {
-      setTimeout(() => navigate(ROUTES.USER.LIST), 1500);
-    },
-
-    showToast,
-    messages: {
-      activateSuccess: "Activado correctamente",
-      deactivateSuccess: "Inactivado correctamente",
-      toggleError: () => "No se pudo completar la acción. Inténtalo de nuevo.",
-      deleteSuccess: "Empleado eliminado correctamente",
-      deleteError: (error) => getErrorMessage(error, "No se pudo eliminar el proyecto."),
-    },
-  });
-  const [activeTab, setActiveTab] = useState<ProjectTab>('info');
-
-  const canEdit = targetProject?.permissions.canEdit ?? false;
-  const canDelete = targetProject?.permissions.canDelete ?? false;
-
-  useEffect(() => {
-    if (!id) return;
-    projectRepo.getById(id).then(setTargetProject);
-  }, [id, projectRepo]);
+    targetProject, activeTab, setActiveTab,
+    canEdit, canDelete,
+    toast, closeToast,
+    modalActive, loadingPatch,
+    openModal, closeModal,
+    handleToggleActive, handleDelete,
+    handleBack,
+  } = useProjectDetailPage();
 
   return (
     <section className="project-detail-page">
@@ -94,7 +50,7 @@ export const ProjectDetailPage = () => {
       <DetailPageHeader
         title="Detalle del Proyecto"
         subtitle="Información completa del proyecto"
-        onBack={() => navigate(ROUTES.PROJECTS.LIST)}
+        onBack={handleBack}
         actions={(canEdit || canDelete) && (
           <>
             {canEdit && (
@@ -116,16 +72,16 @@ export const ProjectDetailPage = () => {
           </>
         )}
       />
+
       <ProjectMenuBar activeTab={activeTab} onTabChange={setActiveTab} />
 
       <div className="project-detail-page_content">
-        {activeTab === 'info' && <ProjectInfo isActive={targetProject?.isActive} />}
-        {activeTab === 'equipo' && <ProjectTeam />}
-        {activeTab === 'cliente' && <ProjectClients />}
-        {activeTab === 'desarrollo' && <ProjectDevelopment canEdit={canEdit} />}
-        {activeTab === 'horas' && <ProjectHours />}
+        {activeTab === "info" && <ProjectInfo isActive={targetProject?.isActive} />}
+        {activeTab === "equipo" && <ProjectTeam />}
+        {activeTab === "cliente" && <ProjectClients />}
+        {activeTab === "desarrollo" && <ProjectDevelopment canEdit={canEdit} />}
+        {activeTab === "horas" && <ProjectHours />}
       </div>
-
     </section>
   );
 };
