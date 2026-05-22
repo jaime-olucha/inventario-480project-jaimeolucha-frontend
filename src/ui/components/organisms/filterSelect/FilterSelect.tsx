@@ -1,5 +1,6 @@
 import { Check, ChevronDown } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
+import { useClickOutside } from "@/ui/hooks/useClickOutside";
 import "./FilterSelect.scss";
 
 type Option = { value: string; label: string };
@@ -15,16 +16,7 @@ export const FilterSelect = ({ label, value, options, onChange }: FilterSelectPr
   const [isOpen, setIsOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  useClickOutside(wrapperRef, () => setIsOpen(false));
 
   const selectedLabel = options.find(o => o.value === value)?.label ?? '';
 

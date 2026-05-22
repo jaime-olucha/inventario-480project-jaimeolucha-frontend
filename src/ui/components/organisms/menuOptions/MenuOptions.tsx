@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { MoreVertical } from "lucide-react";
+import { useClickOutside } from "@/ui/hooks/useClickOutside";
 import "./MenuOptions.scss";
 
 export interface MenuOptionItem {
@@ -19,16 +20,7 @@ export const MenuOptions = ({ items, disabled = false }: MenuOptionsProps) => {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (!open) return;
-    const handleClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [open]);
+  useClickOutside(containerRef, () => setOpen(false), open);
 
   const handleItemClick = (item: MenuOptionItem) => {
     if (item.disabled) return;
