@@ -10,6 +10,7 @@ import { getErrorMessage } from "@/infrastructure/helpers/getErrorMessage";
 import { useToast } from "@/ui/hooks/useToast";
 import type { ToastState } from "@/ui/hooks/useToast";
 import { useProjectTeamData } from "./useProjectTeamData";
+import { useTeamFilters } from "./useTeamFilters";
 import type { ProjectUser } from "@/domain/models/Project/ProjectUser";
 import type { ProjectRole } from "@/domain/models/Project/ProjectRole";
 import type { User } from "@/domain/models/User/User";
@@ -83,19 +84,18 @@ export const useProjectTeam = (): UseProjectTeamReturn => {
 
   const [saving, setSaving] = useState(false);
   const { toast, showToast, closeToast } = useToast();
-  const [search, setSearch] = useState("");
-  const [roleFilter, setRoleFilter] = useState("");
   const [formMeta, setFormMeta] = useState<TeamFormMeta | null>(null);
   const [pendingUserChange, setPendingUserChange] = useState<PendingUserChange | null>(null);
 
   const { register, handleSubmit, reset, watch } = useForm<TeamFormValues>({
-    defaultValues: { userId: "" as EntityId, roleId: "" as EntityId },
+    defaultValues: { userId: "", roleId: "" },
   });
 
   const watchedUserId = watch("userId");
   const watchedRoleId = watch("roleId");
 
   const activeTeam = useMemo(() => team.filter((m) => m.isActive), [team]);
+  const { search, setSearch, roleFilter, setRoleFilter, filteredTeam } = useTeamFilters(activeTeam);
 
   const projectManager = useMemo(
     () => activeTeam.find((member) => member.role.name === PROJECT_ROLES.PROJECT_MANAGER),
@@ -132,18 +132,10 @@ export const useProjectTeam = (): UseProjectTeamReturn => {
     [watchedRoleId, projectRoles],
   );
 
-  const filteredTeam = useMemo(() => {
-    const normalizedSearch = search.trim().toLowerCase();
-    return activeTeam.filter((member) => {
-      if (roleFilter && member.role.name !== roleFilter) return false;
-      return !normalizedSearch || getFullName(member).toLowerCase().includes(normalizedSearch);
-    });
-  }, [search, roleFilter, activeTeam]);
-
   const openAddForm = () => {
     const firstUser = availableUsers[0];
     const firstRole = projectRoles.find((role) => role.name !== PROJECT_ROLES.PROJECT_MANAGER || isAdmin) ?? projectRoles[0];
-    reset({ userId: firstUser?.id ?? "" as EntityId, roleId: firstRole?.id ?? "" as EntityId });
+    reset({ userId: firstUser?.id ?? "", roleId: firstRole?.id ?? "" });
     setFormMeta({ mode: "add" });
   };
 
@@ -154,7 +146,7 @@ export const useProjectTeam = (): UseProjectTeamReturn => {
 
   const closeForm = () => {
     setFormMeta(null);
-    reset({ userId: "" as EntityId, roleId: "" as EntityId });
+    reset({ userId: "", roleId: "" });
   };
 
   const findExclusiveRoleOwner = (roleName: string, targetUserId: EntityId) => {
