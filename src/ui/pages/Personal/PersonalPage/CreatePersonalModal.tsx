@@ -3,6 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { X, UserPlus } from "lucide-react";
 import { SYSTEM_ROLES } from "@/domain/value-objects/SystemRole";
+import { getErrorMessage } from "@/infrastructure/helpers/getErrorMessage";
 import type { CreateUserRequest } from "@/domain/models/User/CreateUserRequest";
 import { ActionButton } from "@/ui/components/atoms/actionButton/ActionButton";
 import "./CreatePersonalModal.scss";
@@ -49,14 +50,17 @@ export const CreatePersonalModal = ({ onClose, onSubmit, existingEmails }: Props
       await onSubmit(data);
       onClose();
 
-    } catch {
-      setError("email", { message: "Este email ya está en uso" });
+    } catch (error) {
+      const message = error instanceof Error && error.message.includes("409")
+        ? "Este email ya está en uso"
+        : getErrorMessage(error, "No se pudo crear el usuario. Inténtalo de nuevo.");
+      setError("email", { message });
     }
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" onClick={(event) => event.stopPropagation()}>
+    <div role="presentation" className="modal-overlay" onClick={onClose}>
+      <div role="dialog" aria-modal="true" aria-label="Nuevo Personal" className="modal" onClick={(event) => event.stopPropagation()}>
         <div className="modal_header">
           <h2><UserPlus className="iconHeader" /> Nuevo Personal</h2>
           <button type="button" className="modal_close" onClick={onClose}><X size={20} /></button>

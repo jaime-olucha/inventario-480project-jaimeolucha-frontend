@@ -51,15 +51,16 @@ export function setupAuthInterceptor(axiosInstance: AxiosInstance): void {
 
           useAuthStore.getState().setTokens(data.token, data.refresh_token);
 
-          console.log('Token refrescado correctamente');
-
-
           processQueue(null, data.token);
           originalRequest.headers.Authorization = `Bearer ${data.token}`;
           return axiosInstance(originalRequest);
 
         } catch (refreshError) {
           processQueue(refreshError, null);
+          sessionStorage.setItem("sessionMessage", JSON.stringify({
+            message: "Tu sesión ha sido cerrada. Ponte en contacto con el administrador.",
+            type: "error",
+          }));
           useAuthStore.getState().logout();
           return Promise.reject(refreshError);
 

@@ -1,88 +1,37 @@
-import { useState, useEffect, useCallback } from "react";
 import { Building2, Edit2, FolderKanban, ListTree, Save, X } from "lucide-react";
-import { useRepositories } from "@/infrastructure/RepositoryContext/RepositoryContext";
 import { ActionButton } from "@/ui/components/atoms/actionButton/ActionButton";
+import { Toast } from "@/ui/components/molecules/toast/Toast";
 import { ManageSectorsModal } from "@/ui/pages/Client/ClientPage/ManageSectorsModal";
 import { ContactDetail } from "@/ui/pages/Client/ClientDetailPage/ContactDetail/ContactDetail";
-import { getErrorMessage } from "@/infrastructure/helpers/getErrorMessage";
+import { useClientInfoCard } from "./useClientInfoCard";
 import type { Client } from "@/domain/models/Client/Client";
-import type { Sector } from "@/domain/models/Client/Sector";
-import type { UpdateClientRequest } from "@/domain/models/Client/UpdateClientRequest";
 import type { EntityId } from "@/domain/value-objects/EntityId";
 import "./ClientInfoCard.scss";
 
 interface ClientInfoCardProps {
   clientId: EntityId;
-  isAdmin: boolean;
-  onToast: (message: string, type: "success" | "error") => void;
   onClientLoaded?: (client: Client) => void;
 }
 
-export const ClientInfoCard = ({ clientId, isAdmin, onToast, onClientLoaded }: ClientInfoCardProps) => {
-  const { client: clientRepo, sector: sectorRepo } = useRepositories();
-  const [client, setClient] = useState<Client | null>(null);
-  const [sectors, setSectors] = useState<Sector[]>([]);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editData, setEditData] = useState<UpdateClientRequest>({ name: "", isActive: true, sectorId: "" as EntityId });
-  const [saving, setSaving] = useState(false);
-  const [isManageSectorsOpen, setIsManageSectorsOpen] = useState(false);
-
-  useEffect(() => {
-    clientRepo.getById(clientId).then((loaded) => {
-      setClient(loaded);
-      onClientLoaded?.(loaded);
-    });
-  }, [clientId, clientRepo, onClientLoaded]);
-
-  const refreshSectors = useCallback(async () => {
-    try {
-      setSectors(await sectorRepo.getAll());
-    } catch {
-      onToast("Error al refrescar sectores", "error");
-    }
-  }, [sectorRepo, onToast]);
-
-  const handleEditClick = async () => {
-    if (!client) return;
-    try {
-      setSectors(await sectorRepo.getAll());
-      setEditData({ name: client.name, isActive: client.isActive, sectorId: client.sectorId });
-      setIsEditing(true);
-    } catch {
-      onToast("Error al cargar sectores", "error");
-    }
-  };
-
-  const handleSave = async () => {
-    if (!client) return;
-    setSaving(true);
-    try {
-      await clientRepo.putClient(clientId, editData);
-      const selectedSector = sectors.find((s) => s.id === editData.sectorId);
-      setClient((prev) => prev ? { ...prev, ...editData, sectorName: selectedSector?.name ?? prev.sectorName } : prev);
-      onToast("Información actualizada correctamente", "success");
-      setIsEditing(false);
-    } catch (err) {
-      onToast(getErrorMessage(err, "No se pudo guardar la información del cliente."), "error");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = event.target;
-    setEditData((prev) => ({ ...prev, [name]: value }));
-  };
+export const ClientInfoCard = ({ clientId, onClientLoaded }: ClientInfoCardProps) => {
+  const {
+    client, sectors, isEditing, editData, saving, isAdmin,
+    isManageSectorsOpen, openManageSectors, closeManageSectors,
+    toast, showToast, closeToast,
+    refreshSectors, handleEditClick, handleSave, handleInputChange, cancelEdit,
+  } = useClientInfoCard({ clientId, onClientLoaded });
 
   if (!client) return null;
 
   return (
     <article className="client-info-card">
+      {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
+
       {isManageSectorsOpen && (
         <ManageSectorsModal
-          onClose={() => setIsManageSectorsOpen(false)}
+          onClose={closeManageSectors}
           onSectorsChanged={refreshSectors}
-          onSuccess={(msg) => onToast(msg, "success")}
+          onSuccess={(msg) => showToast(msg, "success")}
         />
       )}
 
@@ -100,7 +49,7 @@ export const ClientInfoCard = ({ clientId, isAdmin, onToast, onClientLoaded }: C
             <ActionButton compact icon={<Save size={16} />} onClick={handleSave} disabled={saving}>
               {saving ? "Guardando..." : "Guardar"}
             </ActionButton>
-            <button type="button" className="btn-cancel" onClick={() => setIsEditing(false)}>
+            <button type="button" className="btn-cancel" onClick={cancelEdit}>
               <X size={16} /> Cancelar
             </button>
           </div>
@@ -139,7 +88,7 @@ export const ClientInfoCard = ({ clientId, isAdmin, onToast, onClientLoaded }: C
                 <div className="form-group">
                   <div className="field-header">
                     <label htmlFor="cic-sector">Sector</label>
-                    <button type="button" className="btn-inline-action" onClick={() => setIsManageSectorsOpen(true)}>
+                    <button type="button" className="btn-inline-action" onClick={openManageSectors}>
                       <ListTree size={12} /> Gestionar Sectores
                     </button>
                   </div>
@@ -163,7 +112,7 @@ export const ClientInfoCard = ({ clientId, isAdmin, onToast, onClientLoaded }: C
       </div>
 
       {!isEditing && (
-        <ContactDetail clientId={clientId} isAdmin={isAdmin} onToast={onToast} />
+        <ContactDetail clientId={clientId} isAdmin={isAdmin} onToast={showToast} />
       )}
     </article>
   );

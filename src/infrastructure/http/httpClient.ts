@@ -32,16 +32,20 @@ export async function httpClient<TResponse, TBody = undefined>(options: HttpRequ
     const response = await axiosInstance.request<TResponse>(axiosConfig);
     return response.data;
 
-  } catch (error: any) {
-    const backDetail = error.response?.data?.detail;
-    const backMessage = error.response?.data?.message;
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      const backDetail = error.response?.data?.detail;
+      const backMessage = error.response?.data?.message;
 
-    if (backDetail) throw new Error(backDetail);
-    if (backMessage) throw new Error(backMessage);
+      if (backDetail) throw new Error(backDetail);
+      if (backMessage) throw new Error(backMessage);
 
-    const status = error.response?.status;
-    const message = error.response?.data ?? error.message ?? "Unknown error";
+      const status = error.response?.status;
+      const message = error.response?.data ?? error.message ?? "Unknown error";
 
-    throw new Error(`HTTP ${status}: ${JSON.stringify(message)}`);
+      throw new Error(`HTTP ${status}: ${JSON.stringify(message)}`);
+    }
+
+    throw error;
   }
 }

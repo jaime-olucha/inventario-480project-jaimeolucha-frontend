@@ -1,43 +1,19 @@
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
-import { useAuthStore } from '../../../infrastructure/store/auth.store'
-import type { LoginFormData } from "./loginSchema";
-import { loginSchema } from "./loginSchema";
-import { useRepositories } from "../../../infrastructure/RepositoryContext/RepositoryContext";
-import { Toast } from "../../components/molecules/toast/Toast";
-import logoWhite from "../../assets/logo-480/480dev_white.webp";
-import './LoginPage.scss';
-
+import { Toast } from "@/ui/components/molecules/toast/Toast";
+import { useLoginPage } from "./useLoginPage";
+import logoWhite from "@/ui/assets/logo-480/480dev_white.webp";
+import "./LoginPage.scss";
 
 export const LoginPage = () => {
-  const setTokens = useAuthStore((state) => state.setTokens);
-  const { auth } = useRepositories();
-  const [sessionMessage] = useState(() => {
-    const msg = sessionStorage.getItem('sessionMessage');
-    sessionStorage.removeItem('sessionMessage');
-    return msg;
-  });
-
-  const { register, handleSubmit, formState: { errors, isSubmitting }
-  } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema)
-  })
-
-  const onSubmit = async (data: LoginFormData) => {
-
-    try {
-      const response = await auth.login(data);
-      setTokens(response.token, response.refreshToken);
-
-    } catch (error) {
-
-      console.error("Login error: ", error);
-    }
-  }
+  const {
+    sessionMessage,
+    closeSessionMessage,
+    toast, closeToast,
+    form: { register, handleSubmit, formState: { errors, isSubmitting } },
+    onSubmit,
+  } = useLoginPage();
 
   return (
-    <section className="login-page" >
+    <section className="login-page">
       <div className="login-page_header">
         <img src={logoWhite} alt="Logo 480DEV" />
         <h1>Gestión de Proyectos</h1>
@@ -45,7 +21,10 @@ export const LoginPage = () => {
       </div>
 
       {sessionMessage && (
-        <Toast message={sessionMessage} type="success" onClose={() => { }} />
+        <Toast message={sessionMessage.message} type={sessionMessage.type} onClose={closeSessionMessage} />
+      )}
+      {toast && (
+        <Toast message={toast.message} type={toast.type} onClose={closeToast} />
       )}
 
       <form className="login-page_form" onSubmit={handleSubmit(onSubmit)}>
@@ -64,5 +43,5 @@ export const LoginPage = () => {
         </button>
       </form>
     </section>
-  )
-}
+  );
+};

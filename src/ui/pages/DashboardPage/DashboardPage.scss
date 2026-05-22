@@ -14,10 +14,6 @@
     font-weight: 500;
   }
 
-  p {
-    font-size: 16px;
-  }
-
   .info {
     color: var(--color-text-secondary);
   }
@@ -61,17 +57,7 @@
       justify-content: space-between;
     }
 
-    .card_badge {
-      position: absolute;
-      bottom: 30px;
-      left: 100px;
-      padding: 4px 5px;
-      font-size: 10px;
-      font-weight: bold;
-      background-color: #ffe2e2;
-      color: rgb(202, 14, 14);
-      border-radius: 10px;
-    }
+
   }
 
   .card {
@@ -368,7 +354,7 @@
       align-items: center;
       gap: 6px;
 
-      & + & {
+      &+& {
         margin-top: 4px;
       }
 

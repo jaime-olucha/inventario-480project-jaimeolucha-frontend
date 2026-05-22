@@ -7,6 +7,7 @@ import { ClientInfoCard } from "@/ui/components/organisms/clientInfoCard/ClientI
 import { Toast } from "@/ui/components/molecules/toast/Toast";
 import type { EntityId } from "@/domain/value-objects/EntityId";
 import type { ProjectDetail } from "@/domain/models/Project/ProjectDetail";
+import { useToast } from "@/ui/hooks/useToast";
 
 export const ProjectClients = () => {
   const { id } = useParams<{ id: EntityId }>();
@@ -15,7 +16,7 @@ export const ProjectClients = () => {
   const isAdmin = userStore?.role === SYSTEM_ROLES.ADMIN;
 
   const [projectDetail, setProjectDetail] = useState<ProjectDetail | null>(null);
-  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const { toast, showToast, closeToast } = useToast();
 
   useEffect(() => {
     if (!id) return;
@@ -30,14 +31,14 @@ export const ProjectClients = () => {
         <Toast
           message={toast.message}
           type={toast.type}
-          onClose={() => setToast(null)}
+          onClose={closeToast}
         />
       )}
 
       <ClientInfoCard
         clientId={projectDetail.clientId}
         isAdmin={isAdmin}
-        onToast={(message, type) => setToast({ message, type })}
+        onToast={showToast}
       />
     </section>
   );

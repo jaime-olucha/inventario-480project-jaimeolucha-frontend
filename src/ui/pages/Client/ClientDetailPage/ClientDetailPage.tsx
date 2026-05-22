@@ -1,79 +1,22 @@
-import { Link, useNavigate, useParams } from "react-router-dom";
-import { useUserStore } from "@/infrastructure/store/user.store";
-import { useRepositories } from "@/infrastructure/RepositoryContext/RepositoryContext";
-import { useEffect, useState, useCallback } from "react";
-import { ROUTES } from "@/ui/routes/routes";
-import "./ClientDetailPage.scss";
-import type { EntityId } from "@/domain/value-objects/EntityId";
-import { ArrowLeft, FolderKanban, Trash2, UserCheck, UserX } from "lucide-react";
-import { SYSTEM_ROLES } from "@/domain/value-objects/SystemRole";
+import { Trash2, UserCheck, UserX } from "lucide-react";
 import { ConfirmModal } from "@/ui/components/organisms/confirmModal/ConfirmModal";
-import { getErrorMessage } from "@/infrastructure/helpers/getErrorMessage";
 import { Toast } from "@/ui/components/molecules/toast/Toast";
+import { DetailPageHeader } from "@/ui/components/molecules/detailPageHeader/DetailPageHeader";
 import { ClientInfoCard } from "@/ui/components/organisms/clientInfoCard/ClientInfoCard";
-import type { Client } from "@/domain/models/Client/Client";
-import type { ClientProject } from "@/domain/models/Client/ClientProject";
+import { ProjectsListCard } from "@/ui/components/organisms/projectsListCard/ProjectsListCard";
+import { useClientDetailPage } from "./useClientDetailPage";
+import "./ClientDetailPage.scss";
 import "@/ui/components/organisms/confirmModal/ConfirmModal.scss";
 
 export const ClientDetailPage = () => {
-  const { id } = useParams<{ id: EntityId }>();
-  const navigate = useNavigate();
-  const userStore = useUserStore((store) => store.user);
-  const { client: clientRepo } = useRepositories();
-
-  const [targetClient, setTargetClient] = useState<Client | null>(null);
-  const [projects, setProjects] = useState<ClientProject[]>([]);
-  const [showAllActive, setShowAllActive] = useState(false);
-  const [showAllInactive, setShowAllInactive] = useState(false);
-  const [modalActive, setModalActive] = useState<"inactivar" | "activar" | "eliminar" | null>(null);
-  const [loadingPatch, setLoadingPatch] = useState(false);
-  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
-
-  const isAdmin = userStore?.role === SYSTEM_ROLES.ADMIN;
-
-  const PROJECTS_PREVIEW_LIMIT = 2;
-  const activeProjects = projects.filter((p) => p.isActive);
-  const inactiveProjects = projects.filter((p) => !p.isActive);
-  const visibleActive = showAllActive ? activeProjects : activeProjects.slice(0, PROJECTS_PREVIEW_LIMIT);
-  const visibleInactive = showAllInactive ? inactiveProjects : inactiveProjects.slice(0, PROJECTS_PREVIEW_LIMIT);
-
-  useEffect(() => {
-    if (!id) return;
-    clientRepo.getProjects(id).then(setProjects);
-  }, [id, clientRepo]);
-
-  const closeToast = useCallback(() => setToast(null), []);
-
-  const handleDelete = async () => {
-    if (!id) return;
-    setLoadingPatch(true);
-    try {
-      await clientRepo.deleteClient(id);
-      setToast({ message: "Cliente eliminado correctamente", type: "success" });
-      setTimeout(() => navigate(ROUTES.CLIENTS.LIST), 1500);
-    } catch (err) {
-      setToast({ message: getErrorMessage(err, "No se pudo eliminar el cliente."), type: "error" });
-    } finally {
-      setLoadingPatch(false);
-      setModalActive(null);
-    }
-  };
-
-  const handleToggleActive = async () => {
-    if (!id || !targetClient) return;
-    const nextValue = !targetClient.isActive;
-    setLoadingPatch(true);
-    try {
-      await clientRepo.patchActive(id, nextValue);
-      setTargetClient((prev) => prev ? { ...prev, isActive: nextValue } : prev);
-      setToast({ message: nextValue ? "Activado correctamente" : "Inactivado correctamente", type: "success" });
-    } catch (err) {
-      setToast({ message: getErrorMessage(err, "No se pudo cambiar el estado del cliente."), type: "error" });
-    } finally {
-      setLoadingPatch(false);
-      setModalActive(null);
-    }
-  };
+  const {
+    id, targetClient, projects, isAdmin,
+    toast, closeToast,
+    modalActive, loadingPatch,
+    openModal, closeModal,
+    handleToggleActive, handleDelete,
+    onClientLoaded, handleBack,
+  } = useClientDetailPage();
 
   return (
     <main className="client-detail-page">
@@ -95,114 +38,46 @@ export const ClientDetailPage = () => {
           }
           loading={loadingPatch}
           onConfirm={modalActive === "eliminar" ? handleDelete : handleToggleActive}
-          onCancel={() => setModalActive(null)}
+          onCancel={closeModal}
         />
       )}
 
-      <div className="client-detail-page_header">
-        <div className="header-left">
-          <button className="btn-back" onClick={() => navigate(ROUTES.CLIENTS.LIST)} aria-label="Volver">
-            <ArrowLeft size={18} />
-          </button>
-          <div>
-            <h1>Detalle de Cliente</h1>
-            <p className="info">Información completa, contactos y proyectos del cliente</p>
-          </div>
-        </div>
-
-        {isAdmin && (
-          <div className="header-actions">
+      <DetailPageHeader
+        title="Detalle de Cliente"
+        subtitle="Información completa, contactos y proyectos del cliente"
+        onBack={handleBack}
+        actions={isAdmin && (
+          <>
             {targetClient?.isActive ? (
-              <button className="btn-action btn-inactivar" onClick={() => setModalActive("inactivar")}>
+              <button className="btn-action btn-inactivar" onClick={() => openModal("inactivar")}>
                 <UserX size={15} /> Inactivar
               </button>
             ) : (
-              <button className="btn-action btn-activar" onClick={() => setModalActive("activar")}>
+              <button className="btn-action btn-activar" onClick={() => openModal("activar")}>
                 <UserCheck size={15} /> Activar
               </button>
             )}
-            <button className="btn-action btn-eliminar" onClick={() => setModalActive("eliminar")}>
+            <button className="btn-action btn-eliminar" onClick={() => openModal("eliminar")}>
               <Trash2 size={15} /> Eliminar
             </button>
-          </div>
+          </>
         )}
-      </div>
+      />
 
       <section className="client-detail-page_section">
         {id && (
           <ClientInfoCard
             clientId={id}
-            isAdmin={isAdmin}
-            onToast={(message, type) => setToast({ message, type })}
-            onClientLoaded={setTargetClient}
+            onClientLoaded={onClientLoaded}
           />
         )}
 
-        <article className="card projects-card">
-          <div className="projects-card_top">
-            <FolderKanban size={18} className="iconSvg" />
-            <div>
-              <h2 className="card_header">Proyectos</h2>
-              <p className="info">Proyectos asociados a este cliente</p>
-            </div>
-          </div>
-
-          {projects.length === 0 && (
-            <p className="no-projects">No hay proyectos asociados</p>
-          )}
-
-          {activeProjects.length > 0 && (
-            <div className="projects-group">
-              <h3 className="group-label group-label--active">
-                Proyectos Activos ({activeProjects.length})
-              </h3>
-              <ul className="projects-list">
-                {visibleActive.map((project) => (
-                  <li key={project.id} className="project-item">
-                    <Link to={ROUTES.PROJECTS.BY_ID(project.id)} className="project-item_inner">
-                      <div>
-                        <p className="project-name">{project.name}</p>
-                        <p className="info project-desc">{project.description}</p>
-                      </div>
-                      <span className="project-badge">{project.teamMembers} miembros</span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-              {activeProjects.length > PROJECTS_PREVIEW_LIMIT && (
-                <button className="btn-toggle" onClick={() => setShowAllActive((v) => !v)}>
-                  {showAllActive ? "Ver menos" : `Ver más (${activeProjects.length - PROJECTS_PREVIEW_LIMIT} más)`}
-                </button>
-              )}
-            </div>
-          )}
-
-          {inactiveProjects.length > 0 && (
-            <div className="projects-group">
-              <h3 className="group-label group-label--inactive">
-                Proyectos Finalizados ({inactiveProjects.length})
-              </h3>
-              <ul className="projects-list">
-                {visibleInactive.map((project) => (
-                  <li key={project.id} className="project-item project-item--inactive">
-                    <div className="project-item_inner">
-                      <div>
-                        <p className="project-name">{project.name}</p>
-                        <p className="info project-desc">{project.description}</p>
-                      </div>
-                      <span className="project-badge project-badge--inactive">Inactivo</span>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-              {inactiveProjects.length > PROJECTS_PREVIEW_LIMIT && (
-                <button className="btn-toggle" onClick={() => setShowAllInactive((v) => !v)}>
-                  {showAllInactive ? "Ver menos" : `Ver más (${inactiveProjects.length - PROJECTS_PREVIEW_LIMIT} más)`}
-                </button>
-              )}
-            </div>
-          )}
-        </article>
+        <ProjectsListCard
+          projects={projects}
+          description="Proyectos asociados a este cliente"
+          emptyText="No hay proyectos asociados"
+          renderActiveBadge={(project) => <span className="project-badge">{project.teamMembers} miembros</span>}
+        />
       </section>
     </main>
   );
