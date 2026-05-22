@@ -59,8 +59,8 @@ export const CreatePersonalModal = ({ onClose, onSubmit, existingEmails }: Props
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" onClick={(event) => event.stopPropagation()}>
+    <div role="presentation" className="modal-overlay" onClick={onClose}>
+      <div role="dialog" aria-modal="true" aria-label="Nuevo Personal" className="modal" onClick={(event) => event.stopPropagation()}>
         <div className="modal_header">
           <h2><UserPlus className="iconHeader" /> Nuevo Personal</h2>
           <button type="button" className="modal_close" onClick={onClose}><X size={20} /></button>

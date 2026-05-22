@@ -24,17 +24,27 @@ export const FilterSelect = ({ label, value, options, onChange }: FilterSelectPr
     <div className="filter_group">
       <label>{label}</label>
       <div className="filter_select_wrapper" ref={wrapperRef}>
-        <div className="filter_select_trigger" onClick={() => setIsOpen(prev => !prev)}>
+        <div
+          role="button"
+          tabIndex={0}
+          className="filter_select_trigger"
+          onClick={() => setIsOpen(prev => !prev)}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setIsOpen(prev => !prev); } }}
+        >
           <span>{selectedLabel}</span>
           <ChevronDown className={`chevron_icon${isOpen ? ' open' : ''}`} />
         </div>
         {isOpen && (
-          <div className="filter_dropdown">
+          <div role="listbox" className="filter_dropdown">
             {options.map(opt => (
               <div
                 key={opt.value}
+                role="option"
+                aria-selected={opt.value === value}
+                tabIndex={0}
                 className={`filter_option${opt.value === value ? ' selected' : ''}`}
                 onClick={() => { onChange(opt.value); setIsOpen(false); }}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onChange(opt.value); setIsOpen(false); } }}
               >
                 <span>{opt.label}</span>
                 {opt.value === value && <Check className="check_icon" />}

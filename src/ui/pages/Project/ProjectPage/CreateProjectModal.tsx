@@ -22,9 +22,9 @@ export const CreateProjectModal = ({ onClose, onSubmit }: Props) => {
   const clientOptions = clients.map((client) => ({ value: client.id, label: client.name }));
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div role="presentation" className="modal-overlay" onClick={onClose}>
       {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
-      <div className="modal" onClick={(event) => event.stopPropagation()}>
+      <div role="dialog" aria-modal="true" aria-label="Nuevo Proyecto" className="modal" onClick={(event) => event.stopPropagation()}>
         <div className="modal_header">
           <h2><FolderPlus className="iconHeader" />Nuevo Proyecto</h2>
           <button type="button" className="modal_close" onClick={onClose}><X size={20} /></button>

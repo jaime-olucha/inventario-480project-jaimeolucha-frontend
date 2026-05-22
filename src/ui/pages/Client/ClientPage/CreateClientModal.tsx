@@ -24,9 +24,9 @@ export const CreateClientModal = ({ onClose, onSubmit }: Props) => {
   const { register, handleSubmit: _, control, formState: { errors, isSubmitting } } = form;
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div role="presentation" className="modal-overlay" onClick={onClose}>
       {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
-      <div className="modal" onClick={(event) => event.stopPropagation()}>
+      <div role="dialog" aria-modal="true" aria-label="Nuevo Cliente" className="modal" onClick={(event) => event.stopPropagation()}>
         <div className="modal_header">
           <h2><Building2 className="iconHeader" /> Nuevo Cliente</h2>
           <button type="button" className="modal_close" onClick={onClose}><X size={20} /></button>
@@ -55,7 +55,7 @@ export const CreateClientModal = ({ onClose, onSubmit }: Props) => {
             render={({ field }) => (
               <div className="form_field-with-action">
                 <div className="field-header">
-                  <label>Sector</label>
+                  <span className="form_label">Sector</span>
                   <button type="button" className="btn-inline-action" onClick={openManageSectors}>
                     <ListTree size={12} /> Gestionar Sectores
                   </button>

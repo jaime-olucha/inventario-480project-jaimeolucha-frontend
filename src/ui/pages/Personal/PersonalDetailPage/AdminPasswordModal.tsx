@@ -30,8 +30,8 @@ export const AdminPasswordModal = ({ onClose, onSubmit }: Props) => {
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" onClick={(e) => e.stopPropagation()}>
+    <div role="presentation" className="modal-overlay" onClick={onClose}>
+      <div role="dialog" aria-modal="true" aria-label="Cambiar contraseña" className="modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal_header">
           <h2><Lock className="iconHeader" /> Cambiar contraseña</h2>
           <button type="button" className="modal_close" onClick={onClose}><X size={20} /></button>

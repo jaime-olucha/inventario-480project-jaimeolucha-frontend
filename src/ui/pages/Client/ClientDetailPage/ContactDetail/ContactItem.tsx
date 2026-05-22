@@ -54,7 +54,7 @@ export const ContactItem = ({
         </button>
 
         {activeNoteContactId === contact.id && contact.note && (
-          <div className="note-bubble" onClick={(event) => event.stopPropagation()}>
+          <div role="presentation" className="note-bubble" onClick={(event) => event.stopPropagation()}>
             <div className="bubble-content">{contact.note}</div>
             <div className="bubble-arrow"></div>
           </div>

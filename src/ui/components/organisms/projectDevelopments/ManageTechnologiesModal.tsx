@@ -21,7 +21,7 @@ export const ManageTechnologiesModal = ({ onClose, onChanged, onSuccess }: Manag
   } = useManageTechnologiesModal({ onChanged, onSuccess });
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div role="presentation" className="modal-overlay" onClick={onClose}>
       {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
 
       {techToDelete && (
@@ -34,7 +34,7 @@ export const ManageTechnologiesModal = ({ onClose, onChanged, onSuccess }: Manag
         />
       )}
 
-      <div className="modal manage-technologies-modal" onClick={(e) => e.stopPropagation()}>
+      <div role="dialog" aria-modal="true" aria-label="Gestionar Tecnologías" className="modal manage-technologies-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal_header">
           <h2><Settings className="iconHeader" /> Gestionar Tecnologías</h2>
           <button type="button" className="modal_close" onClick={onClose}><X size={20} /></button>

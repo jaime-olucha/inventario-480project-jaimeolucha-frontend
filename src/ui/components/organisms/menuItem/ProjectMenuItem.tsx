@@ -93,11 +93,15 @@ function ProjectMenuBar({ activeTab, onTabChange }: ProjectMenuBarProps): React.
           return (
             <li key={tab.id} className="relative flex-1">
               <motion.div
+                role="tab"
+                tabIndex={0}
+                aria-selected={isActive}
                 className="block rounded-xl overflow-visible group relative cursor-pointer w-full"
                 style={{ perspective: '600px' }}
                 whileHover="hover"
                 initial="initial"
                 onClick={() => onTabChange(tab.id)}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onTabChange(tab.id); } }}
               >
                 <motion.div
                   className="absolute inset-0 z-0 pointer-events-none rounded-xl"

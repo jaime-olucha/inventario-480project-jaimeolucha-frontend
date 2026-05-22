@@ -2,7 +2,7 @@ import { useEffect } from "react"
 import { useAuthStore } from "@/infrastructure/store/auth.store"
 import { useUserStore } from "@/infrastructure/store/user.store"
 import { jwtDecode } from "jwt-decode"
-import type { JwtPayload } from "./interface/JwtPayload"
+import type { JwtPayload } from "@/infrastructure/http/JwtPayload"
 import { useRepositories } from "@/infrastructure/RepositoryContext/RepositoryContext"
 
 export const useAuthInit = () => {

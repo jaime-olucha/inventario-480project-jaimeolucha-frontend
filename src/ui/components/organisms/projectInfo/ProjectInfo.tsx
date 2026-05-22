@@ -99,8 +99,9 @@ export const ProjectInfo = ({ isActive }: ProjectInfoProps) => {
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="edit-grid">
               <div className="form-group form-group--full">
-                <label>Nombre del proyecto</label>
+                <label htmlFor="proj-name">Nombre del proyecto</label>
                 <input
+                  id="proj-name"
                   className={`edit-input ${errors.name ? "edit-input--error" : ""}`}
                   placeholder="Nombre del proyecto"
                   {...register("name", { required: "El nombre es obligatorio" })}
@@ -109,8 +110,9 @@ export const ProjectInfo = ({ isActive }: ProjectInfoProps) => {
               </div>
 
               <div className="form-group form-group--full">
-                <label>Descripción</label>
+                <label htmlFor="proj-description">Descripción</label>
                 <textarea
+                  id="proj-description"
                   className="edit-input"
                   placeholder="Descripción del proyecto"
                   {...register("description")}
@@ -118,8 +120,9 @@ export const ProjectInfo = ({ isActive }: ProjectInfoProps) => {
               </div>
 
               <div className="form-group">
-                <label>Fecha de inicio</label>
+                <label htmlFor="proj-start-date">Fecha de inicio</label>
                 <input
+                  id="proj-start-date"
                   type="date"
                   className={`edit-input ${errors.startDate ? "edit-input--error" : ""}`}
                   {...register("startDate", { required: "La fecha es obligatoria" })}
@@ -128,10 +131,11 @@ export const ProjectInfo = ({ isActive }: ProjectInfoProps) => {
               </div>
 
               <div className="form-group">
-                <label>Cliente</label>
+                <label htmlFor="proj-client">Cliente</label>
                 {isAdmin ? (
                   <>
                     <select
+                      id="proj-client"
                       className={`edit-select ${errors.clientId ? "edit-input--error" : ""}`}
                       {...register("clientId", { required: "El cliente es obligatorio" })}
                     >

@@ -101,7 +101,7 @@ export const UserInfoCard = ({
               </div>
               {!isMyProfile && (
                 <div className="form-group checkbox-group">
-                  <label>Rol de Usuario</label>
+                  <span className="form-label">Rol de Usuario</span>
                   <div className="checkbox-wrapper">
                     <input
                       id="isAdmin"

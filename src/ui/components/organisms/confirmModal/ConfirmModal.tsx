@@ -9,8 +9,8 @@ interface Props {
 
 export const ConfirmModal = ({ title, message, confirmLabel = "Confirmar", loading = false, onConfirm, onCancel }: Props) => {
   return (
-    <div className="confirm-modal-overlay" onClick={onCancel}>
-      <div className="confirm-modal" onClick={(e) => e.stopPropagation()}>
+    <div role="presentation" className="confirm-modal-overlay" onClick={onCancel}>
+      <div role="dialog" aria-modal="true" aria-label={title} className="confirm-modal" onClick={(e) => e.stopPropagation()}>
         <h2 className="confirm-modal_title">{title}</h2>
         <p className="confirm-modal_message">{message}</p>
         <div className="confirm-modal_actions">

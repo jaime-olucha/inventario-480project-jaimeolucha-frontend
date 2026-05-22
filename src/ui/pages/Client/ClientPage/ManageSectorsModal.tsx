@@ -20,7 +20,7 @@ export const ManageSectorsModal = ({ onClose, onSectorsChanged, onSuccess }: Man
   } = useManageSectorsModal({ onClose, onSectorsChanged, onSuccess });
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div role="presentation" className="modal-overlay" onClick={onClose}>
       {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
 
       {sectorToDelete && (
@@ -33,7 +33,7 @@ export const ManageSectorsModal = ({ onClose, onSectorsChanged, onSuccess }: Man
         />
       )}
 
-      <div className="modal manage-sectors-modal" onClick={(e) => e.stopPropagation()}>
+      <div role="dialog" aria-modal="true" aria-label="Gestionar Sectores" className="modal manage-sectors-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal_header">
           <h2><ListTree className="iconHeader" /> Gestionar Sectores</h2>
           <button type="button" className="modal_close" onClick={onClose}><X size={20} /></button>
