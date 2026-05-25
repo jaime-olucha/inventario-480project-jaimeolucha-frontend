@@ -1,6 +1,7 @@
 services:
   frontend:
     build: .
+    user: "${UID}:${GID}"
     ports:
       - "5173:5173"
     volumes:
