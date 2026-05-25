@@ -4,6 +4,8 @@ import path from 'path'
 
 // https://vite.dev/config/
 export default defineConfig({
+
+  cacheDir: '.vite',
   test: {
     environment: 'jsdom',
     globals: true,
